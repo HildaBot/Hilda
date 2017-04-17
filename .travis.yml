@@ -1,0 +1,10 @@
+language: java
+jdk:
+- oraclejdk8
+deploy:
+  provider: releases
+  api_key:
+    secure: jWi1P+gyD5aNsMeFAJnVWhkqxFiWPzgB86NRYxnkRTnQHqxLGn3L+Imlvjz1XYBKatzJKp2svVhRWkrYEf9ZzosIketJeNwHwP+Asb5tNgMBs0NREUs/KMTlRnYpsUc2Wm8bBkjDMfGQOEbDC/cyHLOUZcha0Qm5msIHj2/h+KgkOtcpmcwrtTZwoFTjIbIHe3VKMu7gDenCICrRNl/vL84sshx1cBGf/scTVHWrBqqTQmYh6u5ShIIKZNv26nNeHC5m/bKlytoUn3uyl6iBAAfUNAI+ZSBdH8MdsN6/AOxUq29PRUaPlonqVfD0lXKTWMslNXmlaDzzOSp1atB39eQnU1r1alryHD3kbePXdHiGvHSOdXjJdHk5vm4O49Q8nIfDU5ofS+7dBF6+/SOuBSxZxQSSkE9ogAKNEDMoqLzYMzHzQ/mk0S2nJo9tjndSZNDCXtKlEW9w69OnrXMju0rgTDMAXaiFnGYvr1KkDXTwvKnxhUs5egz3xbYwMOuw1ss6Y8sxLF245eztgiVGRG/xYpA1FNx2T8Kf+SyZspKlANGntTtr3ET1tsSqWvS90Xa/gHxgrBaehdAhbeHoaGYw4JkFEdoj6JEHgUrtLm6STKOBGFZViNZOW48kUMP4eOoJa1YdILpKhLWVwRQyzmGjZ1CZtsdjFtaaZTBDRjI=
+  file: target/Hilda.jar
+  on:
+    tags: true
