@@ -34,10 +34,14 @@ public abstract class HildaPlugin {
         return this.pluginData;
     }
 
-    public abstract void onDisable();
+    public void onDisable() {
+
+    }
 
     public abstract void onEnable();
 
-    public abstract void onLoad();
+    public void onLoad() {
+
+    }
 
 }
