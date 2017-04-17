@@ -1,0 +1,107 @@
+package ch.jamiete.hilda;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import javax.security.auth.login.LoginException;
+import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
+import net.dv8tion.jda.core.exceptions.RateLimitedException;
+
+public class Start {
+    /**
+     * Whether the bot should be more verbose in logging
+     */
+    public static final boolean DEBUG = false;
+
+    public static void main(final String[] args) {
+        if (args.length != 1) {
+            System.err.println("HILDA DID NOT START.");
+            System.err.println();
+            System.err.println("You must provide a single argument consisting of the API key to use when connecting.");
+            System.err.println();
+            System.err.println("Terminating...");
+            System.exit(1);
+        }
+
+        final Start start = new Start();
+        Start.setupLogging();
+        start.start(args[0]);
+    }
+
+    public static void setupLogging() {
+        for (final Handler h : Hilda.getLogger().getHandlers()) {
+            if (h instanceof LogReporter) {
+                continue;
+            }
+
+            h.close();
+            Hilda.getLogger().removeHandler(h);
+        }
+
+        Hilda.getLogger().setUseParentHandlers(false);
+        final ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(new LogFormat());
+        Hilda.getLogger().addHandler(handler);
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionListener());
+
+        try {
+            final File file = new File("log");
+
+            if (!file.isDirectory()) {
+                file.mkdir();
+            }
+
+            final FileHandler lfh = new FileHandler("log/hilda_" + new SimpleDateFormat("dd-MM-yyyy").format(Calendar.getInstance().getTime()) + ".log", true);
+            lfh.setFormatter(new LogFormat());
+            Hilda.getLogger().addHandler(lfh);
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+
+        if (Start.DEBUG) {
+            handler.setLevel(Level.FINE);
+            Hilda.getLogger().setLevel(Level.FINE);
+        }
+    }
+
+    private Hilda hilda;
+
+    private int tries = 0;
+
+    private void start(final String apikey) {
+        if (Start.DEBUG) {
+            Hilda.getLogger().fine("Debug enabled.");
+        }
+
+        try {
+            this.hilda = new Hilda(apikey);
+
+            Hilda.getLogger().addHandler(new LogReporter(this.hilda));
+
+            this.hilda.start();
+        } catch (final IllegalArgumentException e) {
+            e.printStackTrace();
+            System.exit(1);
+        } catch (LoginException | InterruptedException
+                | RateLimitedException e) {
+            e.printStackTrace();
+
+            this.tries++;
+
+            if (this.tries < 5) {
+                Hilda.getLogger().warning("Failed to login; retrying...");
+                this.hilda.bot.shutdown(true);
+                this.hilda = null;
+                this.start(apikey);
+            } else {
+                Hilda.getLogger().severe("Failed to login 5 times; giving up.");
+                System.exit(1);
+            }
+        }
+    }
+
+}
