@@ -69,7 +69,7 @@ public class PluginManager {
                 try {
                     entry.onEnable();
                 } catch (final Exception e) {
-                    Hilda.getLogger().log(Level.WARNING, "Encountered an exception while disabling plugin " + entry.getPluginData().getName(), e);
+                    Hilda.getLogger().log(Level.WARNING, "Encountered an exception while enabling plugin " + entry.getPluginData().getName(), e);
                     this.plugins.remove(entry);
                 }
             }
