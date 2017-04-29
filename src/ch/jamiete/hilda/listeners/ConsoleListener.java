@@ -60,6 +60,10 @@ public class ConsoleListener extends Thread {
                     }
                     Hilda.getLogger().info("Plugins shut down!");
 
+                    Hilda.getLogger().info("Saving configurations...");
+                    this.hilda.getConfigurationManager().save();
+                    Hilda.getLogger().info("Configurations saved!");
+
                     Hilda.getLogger().info("Shutting down executor...");
                     this.hilda.getExecutor().shutdown();
                     try {

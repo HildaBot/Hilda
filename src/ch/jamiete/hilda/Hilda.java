@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.security.auth.login.LoginException;
 import ch.jamiete.hilda.commands.CommandManager;
+import ch.jamiete.hilda.configuration.ConfigurationManager;
 import ch.jamiete.hilda.listeners.ConsoleListener;
 import ch.jamiete.hilda.plugins.PluginManager;
 import ch.jamiete.hilda.runnables.LogRotateTask;
@@ -43,6 +44,7 @@ public class Hilda {
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(3);
 
     private CommandManager commander;
+    private ConfigurationManager configs;
     private PluginManager plugins;
 
     public Hilda(final String apikey) throws LoginException, IllegalArgumentException, InterruptedException, RateLimitedException {
@@ -61,6 +63,13 @@ public class Hilda {
      */
     public CommandManager getCommandManager() {
         return this.commander;
+    }
+
+    /**
+     * @return The {@link ConfigurationManager} instance
+     */
+    public ConfigurationManager getConfigurationManager() {
+        return this.configs;
     }
 
     /**
@@ -132,6 +141,7 @@ public class Hilda {
 
         Hilda.getLogger().info("Registering managers...");
         this.commander = new CommandManager(this);
+        this.configs = new ConfigurationManager();
         this.plugins = new PluginManager(this);
         Hilda.getLogger().info("Managers registered!");
 
