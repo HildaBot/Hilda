@@ -29,7 +29,7 @@ public class PluginData {
     
     // internal fields
     protected File pluginFile;
-    protected boolean valid;
+    protected boolean loaded;
 
     public File getPluginFile() {
         return pluginFile;

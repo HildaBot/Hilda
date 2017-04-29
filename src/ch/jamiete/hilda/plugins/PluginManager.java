@@ -109,7 +109,7 @@ public class PluginManager {
                     Sanity.nullCheck(data.author, "A plugin must define its author.");
 
                     data.pluginFile = file;
-                    data.valid = false;
+                    data.loaded = false;
                     if (data.dependencies == null) {
                         data.dependencies = new String[0];
                     }
@@ -129,7 +129,7 @@ public class PluginManager {
         }
     }
 
-    private void loadPlugin(final PluginData data) {
+    private boolean loadPlugin(final PluginData data) {
         try {
             final URLClassLoader classLoader = new URLClassLoader(new URL[]{data.pluginFile.toURI().toURL()});
             final Class<?> mainClass = Class.forName(data.mainClass, true, classLoader);
@@ -137,7 +137,8 @@ public class PluginManager {
             if (mainClass != null) {
                 if (!HildaPlugin.class.isAssignableFrom(mainClass)) {
                     Hilda.getLogger().severe("Could not load plugin " + data.getName() + " because its main class did not implement HildaPlugin!");
-                    return;
+                    pluginJsons.remove(data.getName());
+                    return false;
                 }
 
                 final HildaPlugin newPlugin = (HildaPlugin) mainClass.getConstructor(Hilda.class).newInstance(this.hilda);
@@ -149,10 +150,16 @@ public class PluginManager {
                 this.plugins.add(newPlugin);
 
                 Hilda.getLogger().info("Loaded plugin " + data.name);
+
+                data.loaded = true;
+
+                return true;
             }
         } catch (final Exception ex) {
             Logger.getLogger(PluginManager.class.getName()).log(Level.SEVERE, null, ex);
         }
+        pluginJsons.remove(data.getName());
+        return false;
     }
 
     public void loadPlugins() {
@@ -169,41 +176,39 @@ public class PluginManager {
                 this.loadPluginJson(file);
             }
         }
-        // mark plugin as valid if its dependencies are loaded
         for (PluginData dat : pluginJsons.values()) {
-            boolean containsAllDependencies = true;
-            for (String depName : dat.dependencies) {
-                if (!pluginJsons.containsKey(depName)) {
-                    containsAllDependencies = false;
-                }
-            }
-            if (containsAllDependencies) {
-                dat.valid = true;
-            }
-        }
-        // if plugin is valid and all its dependencies are also valid, load the plugin
-        for (PluginData dat : pluginJsons.values()) {
-            boolean valid = true;
-            List<String> missingDeps = new ArrayList<>();
-            for (String depName : dat.dependencies) {
-                PluginData depJson = pluginJsons.get(depName);
-                if (depJson == null || !depJson.valid) {
-                    valid = false;
-                    missingDeps.add(depName);
-                }
-            }
-            if (!dat.valid) {
-                valid = false;
-            }
-            if (valid) {
-                loadPlugin(dat);
-            } else {
-                Hilda.getLogger().severe("Plugin (" + dat.getName() + ") failed to load because of missing dependencies " + missingDeps);
-            }
+            tryLoadPlugin(dat);
         }
         // invoke newPlugin.onLoad after every plugin is loaded, because if the plugin has dependencies they may not have been loaded yet
         for (HildaPlugin newPlugin : getPlugins()) {
             newPlugin.onLoad();
         }
+    }
+
+    /**
+     * Load plugins dependencies before loading the plugin itself
+     * 
+     * TODO: add counter so it doesn't get stuck recursing
+     */
+    private boolean tryLoadPlugin(PluginData plug) {
+        if (plug.loaded) {
+            return true;
+        }
+        for (String depName : plug.getDependencies()) {
+            PluginData depJson = pluginJsons.get(depName);
+            if (depJson == null) {
+                return false; // missing dependency!
+            }
+            if (depJson.dependencies.length == 0) { // has no dependencies
+                if (!loadPlugin(depJson)) {
+                    return false; // couldn't load plugin!
+                }
+            } else {
+                if (!tryLoadPlugin(plug)) {
+                    return false;
+                }
+            }
+        }
+        return loadPlugin(plug);
     }
 }
