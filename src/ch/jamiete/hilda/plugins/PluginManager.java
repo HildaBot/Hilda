@@ -109,6 +109,7 @@ public class PluginManager {
 
                     data.pluginFile = file;
                     data.loaded = false;
+
                     if (data.dependencies == null) {
                         data.dependencies = new String[0];
                     }
@@ -129,6 +130,10 @@ public class PluginManager {
     }
 
     private boolean loadPlugin(final PluginData data) {
+        if (data.loaded) {
+            return true;
+        }
+
         try {
             final URLClassLoader classLoader = new URLClassLoader(new URL[] { data.pluginFile.toURI().toURL() });
             final Class<?> mainClass = Class.forName(data.mainClass, true, classLoader);
@@ -157,6 +162,7 @@ public class PluginManager {
         } catch (final Exception ex) {
             Logger.getLogger(PluginManager.class.getName()).log(Level.SEVERE, null, ex);
         }
+
         pluginJsons.remove(data.getName());
         return false;
     }
