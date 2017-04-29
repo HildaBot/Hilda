@@ -36,7 +36,6 @@ import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.lang3.ArrayUtils;
 
 public class PluginManager {
 
