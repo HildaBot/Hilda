@@ -143,8 +143,8 @@ public class CommandManager extends ListenerAdapter {
     public void registerChannelCommand(final ChannelCommand command) {
         Sanity.nullCheck(command, "You must specify a command.");
         Sanity.nullCheck(command.getName(), "Command must be named.");
-        Sanity.truthiness(!this.channelcommands.contains(command), "Cannot register duplicate command.");
-        Sanity.truthiness(!this.isChannelCommand(command.getName()), "Command name is already registered.");
+        Sanity.truthiness(!this.channelcommands.contains(command), "Cannot register duplicate command " + command.getName() + ".");
+        Sanity.truthiness(!this.isChannelCommand(command.getName()), "Command name " + command.getName() + " is already registered.");
 
         if (command.getAliases() != null) {
             command.setAliases(this.cleanChannelAliases(command.getAliases()));
