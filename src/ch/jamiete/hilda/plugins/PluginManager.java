@@ -34,8 +34,13 @@ import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.lang3.ArrayUtils;
 
 public class PluginManager {
+
+    private final Map<String, PluginData> pluginJsons = Collections.synchronizedMap(new HashMap<>());
     private final List<HildaPlugin> plugins = Collections.synchronizedList(new ArrayList<>());
     private final Hilda hilda;
 
@@ -78,13 +83,14 @@ public class PluginManager {
 
     /**
      * Gets a list of the plugins tracked by the manager.
+     *
      * @return An unmodifiable list
      */
     public List<HildaPlugin> getPlugins() {
         return Collections.unmodifiableList(this.plugins);
     }
 
-    private void loadPlugin(final File file) {
+    private void loadPluginJson(final File file) {
         try {
             final ZipFile zipFile = new ZipFile(file);
             final Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -101,22 +107,36 @@ public class PluginManager {
                     Sanity.nullCheck(data.mainClass, "A plugin must define its main class.");
                     Sanity.nullCheck(data.version, "A plugin must define its version.");
                     Sanity.nullCheck(data.author, "A plugin must define its author.");
+
+                    data.pluginFile = file;
+                    data.valid = false;
+                    if (data.dependencies == null) {
+                        data.dependencies = new String[0];
+                    }
                 }
             }
 
             zipFile.close();
 
             if (data == null) {
-                Hilda.getLogger().severe("Could not load plugin " + file.getName() + " as it has no JSON file!");
+                Hilda.getLogger().severe("Could not load plugin " + data.getName() + " as it has no JSON file!");
                 return;
             }
 
-            final URLClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI().toURL() });
+            pluginJsons.put(data.name, data);
+        } catch (final Exception ex) {
+            Logger.getLogger(PluginManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    private void loadPlugin(final PluginData data) {
+        try {
+            final URLClassLoader classLoader = new URLClassLoader(new URL[]{data.pluginFile.toURI().toURL()});
             final Class<?> mainClass = Class.forName(data.mainClass, true, classLoader);
 
             if (mainClass != null) {
                 if (!HildaPlugin.class.isAssignableFrom(mainClass)) {
-                    Hilda.getLogger().severe("Could not load plugin " + file.getName() + " because its main class did not implement HildaPlugin!");
+                    Hilda.getLogger().severe("Could not load plugin " + data.getName() + " because its main class did not implement HildaPlugin!");
                     return;
                 }
 
@@ -128,7 +148,6 @@ public class PluginManager {
 
                 this.plugins.add(newPlugin);
 
-                newPlugin.onLoad();
                 Hilda.getLogger().info("Loaded plugin " + data.name);
             }
         } catch (final Exception ex) {
@@ -144,10 +163,47 @@ public class PluginManager {
             return;
         }
 
+        // load plugin jsons
         for (final File file : pluginsDir.listFiles()) {
             if (file.isFile() && file.getName().endsWith(".jar")) {
-                this.loadPlugin(file);
+                this.loadPluginJson(file);
             }
+        }
+        // mark plugin as valid if its dependencies are loaded
+        for (PluginData dat : pluginJsons.values()) {
+            boolean containsAllDependencies = true;
+            for (String depName : dat.dependencies) {
+                if (!pluginJsons.containsKey(depName)) {
+                    containsAllDependencies = false;
+                }
+            }
+            if (containsAllDependencies) {
+                dat.valid = true;
+            }
+        }
+        // if plugin is valid and all its dependencies are also valid, load the plugin
+        for (PluginData dat : pluginJsons.values()) {
+            boolean valid = true;
+            List<String> missingDeps = new ArrayList<>();
+            for (String depName : dat.dependencies) {
+                PluginData depJson = pluginJsons.get(depName);
+                if (depJson == null || !depJson.valid) {
+                    valid = false;
+                    missingDeps.add(depName);
+                }
+            }
+            if (!dat.valid) {
+                valid = false;
+            }
+            if (valid) {
+                loadPlugin(dat);
+            } else {
+                Hilda.getLogger().severe("Plugin (" + dat.getName() + ") failed to load because of missing dependencies " + missingDeps);
+            }
+        }
+        // invoke newPlugin.onLoad after every plugin is loaded, because if the plugin has dependencies they may not have been loaded yet
+        for (HildaPlugin newPlugin : getPlugins()) {
+            newPlugin.onLoad();
         }
     }
 }

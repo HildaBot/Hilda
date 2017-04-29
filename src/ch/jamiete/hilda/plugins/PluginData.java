@@ -15,12 +15,25 @@
  *******************************************************************************/
 package ch.jamiete.hilda.plugins;
 
+import java.io.File;
+import java.util.List;
+
 public class PluginData {
 
+    // can be in .json
     protected String name;
     protected String mainClass;
     protected String version;
     protected String author;
+    protected String[] dependencies;
+    
+    // internal fields
+    protected File pluginFile;
+    protected boolean valid;
+
+    public File getPluginFile() {
+        return pluginFile;
+    }
 
     public String getAuthor() {
         return this.author;
@@ -32,6 +45,10 @@ public class PluginData {
 
     public String getVersion() {
         return this.version;
+    }
+
+    public String[] getDependencies() {
+        return dependencies;
     }
 
 }
