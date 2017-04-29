@@ -16,7 +16,6 @@
 package ch.jamiete.hilda.plugins;
 
 import java.io.File;
-import java.util.List;
 
 public class PluginData {
 
@@ -26,7 +25,7 @@ public class PluginData {
     protected String version;
     protected String author;
     protected String[] dependencies;
-    
+
     // internal fields
     protected File pluginFile;
     protected boolean loaded;

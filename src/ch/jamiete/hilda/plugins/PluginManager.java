@@ -24,8 +24,10 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -34,8 +36,6 @@ import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
-import java.util.HashMap;
-import java.util.Map;
 
 public class PluginManager {
 
@@ -118,7 +118,7 @@ public class PluginManager {
             zipFile.close();
 
             if (data == null) {
-                Hilda.getLogger().severe("Could not load plugin " + data.getName() + " as it has no JSON file!");
+                Hilda.getLogger().severe("Could not load plugin " + file.getName() + " as it has no JSON file!");
                 return;
             }
 
@@ -130,7 +130,7 @@ public class PluginManager {
 
     private boolean loadPlugin(final PluginData data) {
         try {
-            final URLClassLoader classLoader = new URLClassLoader(new URL[]{data.pluginFile.toURI().toURL()});
+            final URLClassLoader classLoader = new URLClassLoader(new URL[] { data.pluginFile.toURI().toURL() });
             final Class<?> mainClass = Class.forName(data.mainClass, true, classLoader);
 
             if (mainClass != null) {
@@ -175,9 +175,11 @@ public class PluginManager {
                 this.loadPluginJson(file);
             }
         }
+
         for (PluginData dat : pluginJsons.values()) {
             tryLoadPlugin(dat);
         }
+
         // invoke newPlugin.onLoad after every plugin is loaded, because if the plugin has dependencies they may not have been loaded yet
         for (HildaPlugin newPlugin : getPlugins()) {
             newPlugin.onLoad();
@@ -193,11 +195,14 @@ public class PluginManager {
         if (plug.loaded) {
             return true;
         }
+
         for (String depName : plug.getDependencies()) {
             PluginData depJson = pluginJsons.get(depName);
+
             if (depJson == null) {
                 return false; // missing dependency!
             }
+
             if (depJson.dependencies.length == 0) { // has no dependencies
                 if (!loadPlugin(depJson)) {
                     return false; // couldn't load plugin!
@@ -208,6 +213,7 @@ public class PluginManager {
                 }
             }
         }
+
         return loadPlugin(plug);
     }
 }
