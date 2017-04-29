@@ -20,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import javax.security.auth.login.LoginException;
 import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
@@ -48,15 +47,6 @@ public class Start {
     }
 
     public static void setupLogging() {
-        for (final Handler h : Hilda.getLogger().getHandlers()) {
-            if (h instanceof LogReporter) {
-                continue;
-            }
-
-            h.close();
-            Hilda.getLogger().removeHandler(h);
-        }
-
         Hilda.getLogger().setUseParentHandlers(false);
         final ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(new LogFormat());
@@ -94,9 +84,6 @@ public class Start {
 
         try {
             this.hilda = new Hilda(apikey);
-
-            Hilda.getLogger().addHandler(new LogReporter(this.hilda));
-
             this.hilda.start();
         } catch (final IllegalArgumentException e) {
             e.printStackTrace();
