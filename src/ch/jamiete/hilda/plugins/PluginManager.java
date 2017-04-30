@@ -72,8 +72,9 @@ public class PluginManager {
 
                 try {
                     entry.onEnable();
+                    Hilda.getLogger().info("Enabled " + entry.getPluginData().getName() + " v" + entry.getPluginData().getVersion() + " by " + entry.getPluginData().getAuthor());
                 } catch (final Exception e) {
-                    Hilda.getLogger().log(Level.WARNING, "Encountered an exception while enabling plugin " + entry.getPluginData().getName(), e);
+                    Hilda.getLogger().log(Level.WARNING, "Encountered an exception while enabling plugin " + entry.getPluginData().getName() + " v" + entry.getPluginData().getVersion(), e);
                     this.plugins.remove(entry);
                 }
             }
