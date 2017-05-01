@@ -152,7 +152,6 @@ public class CommandManager extends ListenerAdapter {
         }
 
         this.channelcommands.add(command);
-        command.onStartup();
         Hilda.getLogger().info("Registered channel command " + command.getName() + (command.getAliases() != null ? " (" + Util.combineSplit(0, command.getAliases().toArray(new String[command.getAliases().size()]), ", ").trim() + ")" : ""));
     }
 

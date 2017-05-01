@@ -20,7 +20,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Util;
-import ch.jamiete.hilda.commands.ChannelCommand;
 import ch.jamiete.hilda.plugins.HildaPlugin;
 import net.dv8tion.jda.core.OnlineStatus;
 
@@ -47,12 +46,6 @@ public class ConsoleListener extends Thread {
 
                     this.hilda.getBot().getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
                     this.hilda.getCommandManager().shutdown();
-
-                    Hilda.getLogger().info("Shutting down commands...");
-                    for (final ChannelCommand command : this.hilda.getCommandManager().getChannelCommands()) {
-                        command.onShutdown();
-                    }
-                    Hilda.getLogger().info("Commands shut down!");
 
                     Hilda.getLogger().info("Shutting down plugins...");
                     for (final HildaPlugin plugin : this.hilda.getPluginManager().getPlugins()) {

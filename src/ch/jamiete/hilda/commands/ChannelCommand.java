@@ -34,20 +34,6 @@ public abstract class ChannelCommand extends GenericCommand {
     public abstract void execute(Message message, String[] arguments, String label);
 
     /**
-     * Called whenever the bot commences shutting down.
-     */
-    public void onShutdown() {
-
-    }
-
-    /**
-     * Called whenever the bot has finished starting up.
-     */
-    public void onStartup() {
-
-    }
-
-    /**
      * Sends a reply to the channel in which the message was received.
      * @param received The message to be replied to.
      * @param outgoing The message to be sent.
