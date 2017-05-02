@@ -82,12 +82,59 @@ public class PluginManager {
     }
 
     /**
+     * Gets the plugin with that name or null if there is none.
+     * @param name Name to test
+     * @return Plugin with that name
+     */
+    public HildaPlugin getPlugin(final String name) {
+        return this.plugins.stream().filter(p -> p.getPluginData().getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
+
+    /**
      * Gets a list of the plugins tracked by the manager.
      *
      * @return An unmodifiable list
      */
     public List<HildaPlugin> getPlugins() {
         return Collections.unmodifiableList(this.plugins);
+    }
+
+    private boolean loadPlugin(final PluginData data) {
+        if (data.loaded) {
+            return true;
+        }
+
+        try {
+            final URLClassLoader classLoader = new URLClassLoader(new URL[] { data.pluginFile.toURI().toURL() });
+            final Class<?> mainClass = Class.forName(data.mainClass, true, classLoader);
+
+            if (mainClass != null) {
+                if (!HildaPlugin.class.isAssignableFrom(mainClass)) {
+                    Hilda.getLogger().severe("Could not load plugin " + data.getName() + " because its main class did not implement HildaPlugin!");
+                    this.pluginJsons.remove(data.getName());
+                    return false;
+                }
+
+                final HildaPlugin newPlugin = (HildaPlugin) mainClass.getConstructor(Hilda.class).newInstance(this.hilda);
+
+                final Field pluginDataField = HildaPlugin.class.getDeclaredField("pluginData");
+                pluginDataField.setAccessible(true);
+                pluginDataField.set(newPlugin, data);
+
+                this.plugins.add(newPlugin);
+
+                Hilda.getLogger().info("Loaded plugin " + data.name);
+
+                data.loaded = true;
+
+                return true;
+            }
+        } catch (final Exception ex) {
+            Logger.getLogger(PluginManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        this.pluginJsons.remove(data.getName());
+        return false;
     }
 
     private void loadPluginJson(final File file) {
@@ -124,48 +171,10 @@ public class PluginManager {
                 return;
             }
 
-            pluginJsons.put(data.name, data);
+            this.pluginJsons.put(data.name, data);
         } catch (final Exception ex) {
             Logger.getLogger(PluginManager.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    private boolean loadPlugin(final PluginData data) {
-        if (data.loaded) {
-            return true;
-        }
-
-        try {
-            final URLClassLoader classLoader = new URLClassLoader(new URL[] { data.pluginFile.toURI().toURL() });
-            final Class<?> mainClass = Class.forName(data.mainClass, true, classLoader);
-
-            if (mainClass != null) {
-                if (!HildaPlugin.class.isAssignableFrom(mainClass)) {
-                    Hilda.getLogger().severe("Could not load plugin " + data.getName() + " because its main class did not implement HildaPlugin!");
-                    pluginJsons.remove(data.getName());
-                    return false;
-                }
-
-                final HildaPlugin newPlugin = (HildaPlugin) mainClass.getConstructor(Hilda.class).newInstance(this.hilda);
-
-                final Field pluginDataField = HildaPlugin.class.getDeclaredField("pluginData");
-                pluginDataField.setAccessible(true);
-                pluginDataField.set(newPlugin, data);
-
-                this.plugins.add(newPlugin);
-
-                Hilda.getLogger().info("Loaded plugin " + data.name);
-
-                data.loaded = true;
-
-                return true;
-            }
-        } catch (final Exception ex) {
-            Logger.getLogger(PluginManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        pluginJsons.remove(data.getName());
-        return false;
     }
 
     public void loadPlugins() {
@@ -183,44 +192,44 @@ public class PluginManager {
             }
         }
 
-        for (PluginData dat : pluginJsons.values()) {
-            tryLoadPlugin(dat);
+        for (final PluginData dat : this.pluginJsons.values()) {
+            this.tryLoadPlugin(dat);
         }
 
         // invoke newPlugin.onLoad after every plugin is loaded, because if the plugin has dependencies they may not have been loaded yet
-        for (HildaPlugin newPlugin : getPlugins()) {
+        for (final HildaPlugin newPlugin : this.getPlugins()) {
             newPlugin.onLoad();
         }
     }
 
     /**
      * Load plugins dependencies before loading the plugin itself
-     * 
+     *
      * TODO: add counter so it doesn't get stuck recursing
      */
-    private boolean tryLoadPlugin(PluginData plug) {
+    private boolean tryLoadPlugin(final PluginData plug) {
         if (plug.loaded) {
             return true;
         }
 
-        for (String depName : plug.getDependencies()) {
-            PluginData depJson = pluginJsons.get(depName);
+        for (final String depName : plug.getDependencies()) {
+            final PluginData depJson = this.pluginJsons.get(depName);
 
             if (depJson == null) {
                 return false; // missing dependency!
             }
 
             if (depJson.dependencies.length == 0) { // has no dependencies
-                if (!loadPlugin(depJson)) {
+                if (!this.loadPlugin(depJson)) {
                     return false; // couldn't load plugin!
                 }
             } else {
-                if (!tryLoadPlugin(plug)) {
+                if (!this.tryLoadPlugin(plug)) {
                     return false;
                 }
             }
         }
 
-        return loadPlugin(plug);
+        return this.loadPlugin(plug);
     }
 }
