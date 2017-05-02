@@ -36,6 +36,7 @@ import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
+import java.lang.reflect.Method;
 
 public class PluginManager {
 
@@ -105,8 +106,13 @@ public class PluginManager {
         }
 
         try {
-            final URLClassLoader classLoader = new URLClassLoader(new URL[] { data.pluginFile.toURI().toURL() });
-            final Class<?> mainClass = Class.forName(data.mainClass, true, classLoader);
+            URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+            Class sysclass = URLClassLoader.class;
+            Method method = sysclass.getDeclaredMethod("addURL", new Class[]{URL.class});
+            method.setAccessible(true);
+            method.invoke(sysloader, new Object[]{data.pluginFile.toURI().toURL()});
+
+            final Class<?> mainClass = Class.forName(data.mainClass);
 
             if (mainClass != null) {
                 if (!HildaPlugin.class.isAssignableFrom(mainClass)) {
