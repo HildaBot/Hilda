@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import javax.security.auth.login.LoginException;
 import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
@@ -48,6 +49,13 @@ public class Start {
 
     public static void setupLogging() {
         Hilda.getLogger().setUseParentHandlers(false);
+
+        for (Handler handler : Hilda.getLogger().getHandlers()) {
+            if (handler instanceof ConsoleHandler) {
+                Hilda.getLogger().removeHandler(handler);
+            }
+        }
+
         final ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(new LogFormat());
         Hilda.getLogger().addHandler(handler);
