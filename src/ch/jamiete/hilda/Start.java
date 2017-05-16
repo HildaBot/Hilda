@@ -30,16 +30,21 @@ public class Start {
     /**
      * Whether the bot should be more verbose in logging
      */
-    public static final boolean DEBUG = false;
+    public static boolean DEBUG = false;
 
     public static void main(final String[] args) {
-        if (args.length != 1) {
+        if (args.length < 1) {
             System.err.println("HILDA DID NOT START.");
             System.err.println();
             System.err.println("You must provide a single argument consisting of the API key to use when connecting.");
+            System.err.println("Optionally, pass a second argument of 'true' to enable debug.");
             System.err.println();
             System.err.println("Terminating...");
             System.exit(1);
+        }
+
+        if (args.length == 2 && "true".equalsIgnoreCase(args[1])) {
+            Start.DEBUG = true;
         }
 
         final Start start = new Start();
