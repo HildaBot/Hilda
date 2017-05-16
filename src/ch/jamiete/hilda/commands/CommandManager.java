@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
 import ch.jamiete.hilda.Util;
@@ -127,7 +128,7 @@ public class CommandManager extends ListenerAdapter {
                     Hilda.getLogger().fine("    > Finished execution.");
                 }
             } catch (final Exception e) {
-                e.printStackTrace();
+                Hilda.getLogger().log(Level.WARNING, "Encountered an exception while executing " + label + " for " + event.getMember().getEffectiveName() + " in " + event.getGuild().getName(), e);
                 event.getChannel().sendMessage("Something went wrong while executing that command.");
             }
         }

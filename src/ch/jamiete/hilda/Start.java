@@ -99,11 +99,11 @@ public class Start {
             this.hilda = new Hilda(apikey);
             this.hilda.start();
         } catch (final IllegalArgumentException e) {
-            e.printStackTrace();
+            Hilda.getLogger().log(Level.WARNING, "Encountered an exception while starting Hilda", e);
             System.exit(1);
         } catch (LoginException | InterruptedException
                 | RateLimitedException e) {
-            e.printStackTrace();
+            Hilda.getLogger().log(Level.WARNING, "Encountered an exception while logging in to Discord", e);
 
             this.tries++;
 

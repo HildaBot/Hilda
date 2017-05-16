@@ -18,6 +18,7 @@ package ch.jamiete.hilda.listeners;
 import java.util.Scanner;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Util;
 import ch.jamiete.hilda.plugins.HildaPlugin;
@@ -62,7 +63,7 @@ public class ConsoleListener extends Thread {
                     try {
                         this.hilda.getExecutor().awaitTermination(30, TimeUnit.SECONDS);
                     } catch (final InterruptedException e) {
-                        e.printStackTrace();
+                        Hilda.getLogger().log(Level.WARNING, "Encountered an exception whilst terminating executor", e);
                     }
                     Hilda.getLogger().info("Executor completed " + this.hilda.getExecutor().getCompletedTaskCount() + " with largest pool of " + this.hilda.getExecutor().getLargestPoolSize());
                     Hilda.getLogger().info("Executor shut down!");
