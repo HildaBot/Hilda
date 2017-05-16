@@ -134,7 +134,7 @@ public class CommandManager extends ListenerAdapter {
 
                     final ChannelCommand command = this.getChannelCommand(label);
 
-                    if (this.ignoredchannels.contains(event.getChannel().getId()) && !command.doesTranscend() || !event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.ADMINISTRATOR)) {
+                    if (this.ignoredchannels.contains(event.getChannel().getId()) && !command.shouldTranscend(event.getMessage()) || !event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.ADMINISTRATOR)) {
                         Hilda.getLogger().fine("Ignoring message due to ignore override");
                         return;
                     }

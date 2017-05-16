@@ -16,22 +16,15 @@
 package ch.jamiete.hilda.commands;
 
 import ch.jamiete.hilda.Hilda;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 
 public abstract class ChannelCommand extends GenericCommand {
-    private boolean transcend = false;
+    private CommandTranscendLevel transcend = CommandTranscendLevel.NONE;
 
     protected ChannelCommand(final Hilda hilda) {
         super(hilda);
-    }
-
-    /**
-     * Gets whether the command should transcend channel ignores.
-     * @return
-     */
-    public boolean doesTranscend() {
-        return this.transcend;
     }
 
     /**
@@ -41,6 +34,14 @@ public abstract class ChannelCommand extends GenericCommand {
      * @param label The label (could be an alias or the name) that was used to invoke the command.
      */
     public abstract void execute(Message message, String[] arguments, String label);
+
+    /**
+     * Gets the command transcend level.
+     * @return
+     */
+    public CommandTranscendLevel getTranscend() {
+        return this.transcend;
+    }
 
     /**
      * Sends a reply to the channel in which the message was received.
@@ -70,11 +71,37 @@ public abstract class ChannelCommand extends GenericCommand {
     }
 
     /**
-     * Sets whether the command should transcend channel ignores.
+     * Sets the command transcend level.
      * @param transcend
      */
-    public void setTranscend(final boolean transcend) {
+    public void setTranscend(final CommandTranscendLevel transcend) {
         this.transcend = transcend;
+    }
+
+    /**
+     * Gets whether the command should transcend a channel ignore for a particular message.
+     * @param message The message to test
+     * @return Whether command should transcend
+     */
+    public boolean shouldTranscend(final Message message) {
+        switch (this.transcend) {
+            case NONE:
+            default:
+                return false;
+
+            case ALL:
+                return true;
+
+            case MANAGERS:
+                return message.getGuild().getMember(message.getAuthor()).hasPermission(Permission.MANAGE_SERVER);
+
+            case PERMISSION:
+                if (this.getMinimumPermission() == null) {
+                    return false;
+                } else {
+                    return message.getGuild().getMember(message.getAuthor()).hasPermission(message.getTextChannel(), this.getMinimumPermission());
+                }
+        }
     }
 
     /**
