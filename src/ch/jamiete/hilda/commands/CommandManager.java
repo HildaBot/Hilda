@@ -23,6 +23,7 @@ import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
 import ch.jamiete.hilda.Util;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -32,6 +33,7 @@ public class CommandManager extends ListenerAdapter {
      */
     public static final String PREFIX = "!";
     private final List<ChannelCommand> channelcommands;
+    private final List<String> ignoredchannels;
     private boolean stopping = false;
     private final Hilda hilda;
 
@@ -39,6 +41,13 @@ public class CommandManager extends ListenerAdapter {
         this.hilda = hilda;
 
         this.channelcommands = new ArrayList<ChannelCommand>();
+        this.ignoredchannels = new ArrayList<String>();
+    }
+
+    public void addIgnoredChannel(final String id) {
+        if (!this.ignoredchannels.contains(id)) {
+            this.ignoredchannels.add(id);
+        }
     }
 
     /**
@@ -84,6 +93,10 @@ public class CommandManager extends ListenerAdapter {
         return Collections.unmodifiableList(this.channelcommands);
     }
 
+    public List<String> getIgnoredChannels() {
+        return Collections.unmodifiableList(this.ignoredchannels);
+    }
+
     /**
      * Checks whether a command responds to the label. Case insensitive.
      * @param label The label to test for.
@@ -91,6 +104,10 @@ public class CommandManager extends ListenerAdapter {
      */
     public boolean isChannelCommand(final String label) {
         return this.getChannelCommand(label) != null;
+    }
+
+    public boolean isChannelIgnored(final String id) {
+        return this.ignoredchannels.contains(id);
     }
 
     @Override
@@ -101,6 +118,11 @@ public class CommandManager extends ListenerAdapter {
 
         final long start = System.currentTimeMillis();
         Hilda.getLogger().fine("Determining message \"" + event.getMessage().getRawContent() + "\" by " + event.getAuthor().getName() + "...");
+
+        if (this.ignoredchannels.contains(event.getChannel().getId()) && !event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.ADMINISTRATOR)) {
+            Hilda.getLogger().fine("Ignoring message due to ignore override");
+            return;
+        }
 
         String[] args = event.getMessage().getRawContent().split(" ");
 
@@ -154,6 +176,10 @@ public class CommandManager extends ListenerAdapter {
 
         this.channelcommands.add(command);
         Hilda.getLogger().info("Registered channel command " + command.getName() + (command.getAliases() != null ? " (" + Util.combineSplit(0, command.getAliases().toArray(new String[command.getAliases().size()]), ", ").trim() + ")" : ""));
+    }
+
+    public void removeIgnoredChannel(final String id) {
+        this.ignoredchannels.remove(id);
     }
 
     public void shutdown() {
