@@ -20,9 +20,18 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 
 public abstract class ChannelCommand extends GenericCommand {
+    private boolean transcend = false;
 
     protected ChannelCommand(final Hilda hilda) {
         super(hilda);
+    }
+
+    /**
+     * Gets whether the command should transcend channel ignores.
+     * @return
+     */
+    public boolean doesTranscend() {
+        return this.transcend;
     }
 
     /**
@@ -58,6 +67,14 @@ public abstract class ChannelCommand extends GenericCommand {
      */
     protected void reply(final Message received, final String outgoing) {
         received.getChannel().sendMessage(outgoing).queue();
+    }
+
+    /**
+     * Sets whether the command should transcend channel ignores.
+     * @param transcend
+     */
+    public void setTranscend(final boolean transcend) {
+        this.transcend = transcend;
     }
 
     /**

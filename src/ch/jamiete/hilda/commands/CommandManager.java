@@ -119,11 +119,6 @@ public class CommandManager extends ListenerAdapter {
         final long start = System.currentTimeMillis();
         Hilda.getLogger().fine("Determining message \"" + event.getMessage().getRawContent() + "\" by " + event.getAuthor().getName() + "...");
 
-        if (this.ignoredchannels.contains(event.getChannel().getId()) && !event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.ADMINISTRATOR)) {
-            Hilda.getLogger().fine("Ignoring message due to ignore override");
-            return;
-        }
-
         String[] args = event.getMessage().getRawContent().split(" ");
 
         if (args[0].length() > 0 && args[0].startsWith(CommandManager.PREFIX)) {
@@ -138,6 +133,11 @@ public class CommandManager extends ListenerAdapter {
                     Hilda.getLogger().fine("    > Executing command " + label + "...");
 
                     final ChannelCommand command = this.getChannelCommand(label);
+
+                    if (this.ignoredchannels.contains(event.getChannel().getId()) && !command.doesTranscend() || !event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.ADMINISTRATOR)) {
+                        Hilda.getLogger().fine("Ignoring message due to ignore override");
+                        return;
+                    }
 
                     // Check permissions
                     if (command.getMinimumPermission() != null && !event.getMember().hasPermission(event.getChannel(), command.getMinimumPermission())) {
