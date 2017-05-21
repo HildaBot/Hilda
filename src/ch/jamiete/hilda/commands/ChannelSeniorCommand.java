@@ -28,7 +28,7 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.TextChannel;
 
 public abstract class ChannelSeniorCommand extends ChannelCommand {
-    private final List<ChannelCommand> subcommands = new ArrayList<ChannelCommand>();
+    private final List<ChannelSubCommand> subcommands = new ArrayList<ChannelSubCommand>();
 
     protected ChannelSeniorCommand(final Hilda hilda) {
         super(hilda);
@@ -103,7 +103,7 @@ public abstract class ChannelSeniorCommand extends ChannelCommand {
      * @param subcommand The subcommand to register
      * @return Whether the command was registered
      */
-    public boolean registerSubcommand(final ChannelCommand subcommand) {
+    public boolean registerSubcommand(final ChannelSubCommand subcommand) {
         if (this.subcommands.contains(subcommand)) {
             return false;
         }

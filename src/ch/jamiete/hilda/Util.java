@@ -15,6 +15,8 @@
  *******************************************************************************/
 package ch.jamiete.hilda;
 
+import java.util.Calendar;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 public class Util {
@@ -82,6 +84,35 @@ public class Util {
         }
 
         return sb.toString().trim();
+    }
+
+    /**
+     * Gets the milliseconds of the nearest hour in timezone.
+     * @param timezone The timezone to check.
+     * @return The next hour in timezone.
+     */
+    public static long getNextHour(final String timezone) {
+        final Calendar time = Calendar.getInstance(TimeZone.getTimeZone(timezone));
+        time.set(Calendar.MINUTE, 0);
+        time.set(Calendar.SECOND, 0);
+        time.set(Calendar.MILLISECOND, 0);
+        time.add(Calendar.HOUR, 1);
+        return time.getTimeInMillis();
+    }
+
+    /**
+     * Gets the milliseconds of the next midnight in timezone.
+     * @param timezone The timezone to check.
+     * @return The next midnight in timezone.
+     */
+    public static long getNextMidnightInMillis(final String timezone) {
+        final Calendar time = Calendar.getInstance(TimeZone.getTimeZone(timezone));
+        time.set(Calendar.HOUR_OF_DAY, 0);
+        time.set(Calendar.MINUTE, 0);
+        time.set(Calendar.SECOND, 0);
+        time.set(Calendar.MILLISECOND, 0);
+        time.add(Calendar.DAY_OF_MONTH, 1);
+        return time.getTimeInMillis();
     }
 
 }

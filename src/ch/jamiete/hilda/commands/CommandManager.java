@@ -19,9 +19,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
 import ch.jamiete.hilda.Util;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -31,6 +33,7 @@ public class CommandManager extends ListenerAdapter {
      */
     public static final String PREFIX = "!";
     private final List<ChannelCommand> channelcommands;
+    private final List<String> ignoredchannels;
     private boolean stopping = false;
     private final Hilda hilda;
 
@@ -38,6 +41,13 @@ public class CommandManager extends ListenerAdapter {
         this.hilda = hilda;
 
         this.channelcommands = new ArrayList<ChannelCommand>();
+        this.ignoredchannels = new ArrayList<String>();
+    }
+
+    public void addIgnoredChannel(final String id) {
+        if (!this.ignoredchannels.contains(id)) {
+            this.ignoredchannels.add(id);
+        }
     }
 
     /**
@@ -83,6 +93,10 @@ public class CommandManager extends ListenerAdapter {
         return Collections.unmodifiableList(this.channelcommands);
     }
 
+    public List<String> getIgnoredChannels() {
+        return Collections.unmodifiableList(this.ignoredchannels);
+    }
+
     /**
      * Checks whether a command responds to the label. Case insensitive.
      * @param label The label to test for.
@@ -90,6 +104,10 @@ public class CommandManager extends ListenerAdapter {
      */
     public boolean isChannelCommand(final String label) {
         return this.getChannelCommand(label) != null;
+    }
+
+    public boolean isChannelIgnored(final String id) {
+        return this.ignoredchannels.contains(id);
     }
 
     @Override
@@ -116,6 +134,11 @@ public class CommandManager extends ListenerAdapter {
 
                     final ChannelCommand command = this.getChannelCommand(label);
 
+                    if (this.ignoredchannels.contains(event.getChannel().getId()) && (!command.shouldTranscend(event.getMessage()) || !event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.ADMINISTRATOR))) {
+                        Hilda.getLogger().fine("Ignoring message due to ignore override");
+                        return;
+                    }
+
                     // Check permissions
                     if (command.getMinimumPermission() != null && !event.getMember().hasPermission(event.getChannel(), command.getMinimumPermission())) {
                         event.getChannel().sendMessage("You don't have permission to use that command.");
@@ -127,7 +150,7 @@ public class CommandManager extends ListenerAdapter {
                     Hilda.getLogger().fine("    > Finished execution.");
                 }
             } catch (final Exception e) {
-                e.printStackTrace();
+                Hilda.getLogger().log(Level.WARNING, "Encountered an exception while executing " + label + " for " + event.getMember().getEffectiveName() + " in " + event.getGuild().getName(), e);
                 event.getChannel().sendMessage("Something went wrong while executing that command.");
             }
         }
@@ -143,8 +166,8 @@ public class CommandManager extends ListenerAdapter {
     public void registerChannelCommand(final ChannelCommand command) {
         Sanity.nullCheck(command, "You must specify a command.");
         Sanity.nullCheck(command.getName(), "Command must be named.");
-        Sanity.truthiness(!this.channelcommands.contains(command), "Cannot register duplicate command.");
-        Sanity.truthiness(!this.isChannelCommand(command.getName()), "Command name is already registered.");
+        Sanity.truthiness(!this.channelcommands.contains(command), "Cannot register duplicate command " + command.getName() + ".");
+        Sanity.truthiness(!this.isChannelCommand(command.getName()), "Command name " + command.getName() + " is already registered.");
 
         if (command.getAliases() != null) {
             command.setAliases(this.cleanChannelAliases(command.getAliases()));
@@ -152,8 +175,11 @@ public class CommandManager extends ListenerAdapter {
         }
 
         this.channelcommands.add(command);
-        command.onStartup();
         Hilda.getLogger().info("Registered channel command " + command.getName() + (command.getAliases() != null ? " (" + Util.combineSplit(0, command.getAliases().toArray(new String[command.getAliases().size()]), ", ").trim() + ")" : ""));
+    }
+
+    public void removeIgnoredChannel(final String id) {
+        this.ignoredchannels.remove(id);
     }
 
     public void shutdown() {

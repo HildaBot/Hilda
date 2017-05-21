@@ -28,12 +28,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>3.0.0_171</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sedmelluq</groupId>
-            <artifactId>lavaplayer</artifactId>
-            <version>1.2.34</version>
+            <version>3.0.0_199</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -49,11 +44,6 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.mpatric</groupId>
-            <artifactId>mp3agic</artifactId>
-            <version>0.9.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

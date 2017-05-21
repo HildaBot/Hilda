@@ -24,8 +24,10 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -34,8 +36,11 @@ import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
+import java.lang.reflect.Method;
 
 public class PluginManager {
+
+    private final Map<String, PluginData> pluginJsons = Collections.synchronizedMap(new HashMap<>());
     private final List<HildaPlugin> plugins = Collections.synchronizedList(new ArrayList<>());
     private final Hilda hilda;
 
@@ -68,8 +73,9 @@ public class PluginManager {
 
                 try {
                     entry.onEnable();
+                    Hilda.getLogger().info("Enabled " + entry.getPluginData().getName() + " v" + entry.getPluginData().getVersion() + " by " + entry.getPluginData().getAuthor());
                 } catch (final Exception e) {
-                    Hilda.getLogger().log(Level.WARNING, "Encountered an exception while disabling plugin " + entry.getPluginData().getName(), e);
+                    Hilda.getLogger().log(Level.WARNING, "Encountered an exception while enabling plugin " + entry.getPluginData().getName() + " v" + entry.getPluginData().getVersion(), e);
                     this.plugins.remove(entry);
                 }
             }
@@ -77,14 +83,67 @@ public class PluginManager {
     }
 
     /**
+     * Gets the plugin with that name or null if there is none.
+     * @param name Name to test
+     * @return Plugin with that name
+     */
+    public HildaPlugin getPlugin(final String name) {
+        return this.plugins.stream().filter(p -> p.getPluginData().getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
+
+    /**
      * Gets a list of the plugins tracked by the manager.
+     *
      * @return An unmodifiable list
      */
     public List<HildaPlugin> getPlugins() {
         return Collections.unmodifiableList(this.plugins);
     }
 
-    private void loadPlugin(final File file) {
+    private boolean loadPlugin(final PluginData data) {
+        if (data.loaded) {
+            return true;
+        }
+
+        try {
+            URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+            Class sysclass = URLClassLoader.class;
+            Method method = sysclass.getDeclaredMethod("addURL", new Class[]{URL.class});
+            method.setAccessible(true);
+            method.invoke(sysloader, new Object[]{data.pluginFile.toURI().toURL()});
+
+            final Class<?> mainClass = Class.forName(data.mainClass);
+
+            if (mainClass != null) {
+                if (!HildaPlugin.class.isAssignableFrom(mainClass)) {
+                    Hilda.getLogger().severe("Could not load plugin " + data.getName() + " because its main class did not implement HildaPlugin!");
+                    this.pluginJsons.remove(data.getName());
+                    return false;
+                }
+
+                final HildaPlugin newPlugin = (HildaPlugin) mainClass.getConstructor(Hilda.class).newInstance(this.hilda);
+
+                final Field pluginDataField = HildaPlugin.class.getDeclaredField("pluginData");
+                pluginDataField.setAccessible(true);
+                pluginDataField.set(newPlugin, data);
+
+                this.plugins.add(newPlugin);
+
+                Hilda.getLogger().info("Loaded plugin " + data.name);
+
+                data.loaded = true;
+
+                return true;
+            }
+        } catch (final Exception ex) {
+            Logger.getLogger(PluginManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        this.pluginJsons.remove(data.getName());
+        return false;
+    }
+
+    private void loadPluginJson(final File file) {
         try {
             final ZipFile zipFile = new ZipFile(file);
             final Enumeration<? extends ZipEntry> entries = zipFile.entries();
@@ -101,6 +160,13 @@ public class PluginManager {
                     Sanity.nullCheck(data.mainClass, "A plugin must define its main class.");
                     Sanity.nullCheck(data.version, "A plugin must define its version.");
                     Sanity.nullCheck(data.author, "A plugin must define its author.");
+
+                    data.pluginFile = file;
+                    data.loaded = false;
+
+                    if (data.dependencies == null) {
+                        data.dependencies = new String[0];
+                    }
                 }
             }
 
@@ -111,26 +177,7 @@ public class PluginManager {
                 return;
             }
 
-            final URLClassLoader classLoader = new URLClassLoader(new URL[] { file.toURI().toURL() });
-            final Class<?> mainClass = Class.forName(data.mainClass, true, classLoader);
-
-            if (mainClass != null) {
-                if (!HildaPlugin.class.isAssignableFrom(mainClass)) {
-                    Hilda.getLogger().severe("Could not load plugin " + file.getName() + " because its main class did not implement HildaPlugin!");
-                    return;
-                }
-
-                final HildaPlugin newPlugin = (HildaPlugin) mainClass.getConstructor(Hilda.class).newInstance(this.hilda);
-
-                final Field pluginDataField = HildaPlugin.class.getDeclaredField("pluginData");
-                pluginDataField.setAccessible(true);
-                pluginDataField.set(newPlugin, data);
-
-                this.plugins.add(newPlugin);
-
-                newPlugin.onLoad();
-                Hilda.getLogger().info("Loaded plugin " + data.name);
-            }
+            this.pluginJsons.put(data.name, data);
         } catch (final Exception ex) {
             Logger.getLogger(PluginManager.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -144,10 +191,51 @@ public class PluginManager {
             return;
         }
 
+        // load plugin jsons
         for (final File file : pluginsDir.listFiles()) {
             if (file.isFile() && file.getName().endsWith(".jar")) {
-                this.loadPlugin(file);
+                this.loadPluginJson(file);
             }
         }
+
+        for (final PluginData dat : this.pluginJsons.values()) {
+            this.tryLoadPlugin(dat);
+        }
+
+        // invoke newPlugin.onLoad after every plugin is loaded, because if the plugin has dependencies they may not have been loaded yet
+        for (final HildaPlugin newPlugin : this.getPlugins()) {
+            newPlugin.onLoad();
+        }
+    }
+
+    /**
+     * Load plugins dependencies before loading the plugin itself
+     *
+     * TODO: add counter so it doesn't get stuck recursing
+     */
+    private boolean tryLoadPlugin(final PluginData plug) {
+        if (plug.loaded) {
+            return true;
+        }
+
+        for (final String depName : plug.getDependencies()) {
+            final PluginData depJson = this.pluginJsons.get(depName);
+
+            if (depJson == null) {
+                return false; // missing dependency!
+            }
+
+            if (depJson.dependencies.length == 0) { // has no dependencies
+                if (!this.loadPlugin(depJson)) {
+                    return false; // couldn't load plugin!
+                }
+            } else {
+                if (!this.tryLoadPlugin(plug)) {
+                    return false;
+                }
+            }
+        }
+
+        return this.loadPlugin(plug);
     }
 }

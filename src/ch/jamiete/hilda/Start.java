@@ -30,16 +30,21 @@ public class Start {
     /**
      * Whether the bot should be more verbose in logging
      */
-    public static final boolean DEBUG = false;
+    public static boolean DEBUG = false;
 
     public static void main(final String[] args) {
-        if (args.length != 1) {
+        if (args.length < 1) {
             System.err.println("HILDA DID NOT START.");
             System.err.println();
             System.err.println("You must provide a single argument consisting of the API key to use when connecting.");
+            System.err.println("Optionally, pass a second argument of 'true' to enable debug.");
             System.err.println();
             System.err.println("Terminating...");
             System.exit(1);
+        }
+
+        if (args.length == 2 && "true".equalsIgnoreCase(args[1])) {
+            Start.DEBUG = true;
         }
 
         final Start start = new Start();
@@ -48,16 +53,14 @@ public class Start {
     }
 
     public static void setupLogging() {
-        for (final Handler h : Hilda.getLogger().getHandlers()) {
-            if (h instanceof LogReporter) {
-                continue;
-            }
+        Hilda.getLogger().setUseParentHandlers(false);
 
-            h.close();
-            Hilda.getLogger().removeHandler(h);
+        for (Handler handler : Hilda.getLogger().getHandlers()) {
+            if (handler instanceof ConsoleHandler) {
+                Hilda.getLogger().removeHandler(handler);
+            }
         }
 
-        Hilda.getLogger().setUseParentHandlers(false);
         final ConsoleHandler handler = new ConsoleHandler();
         handler.setFormatter(new LogFormat());
         Hilda.getLogger().addHandler(handler);
@@ -94,16 +97,13 @@ public class Start {
 
         try {
             this.hilda = new Hilda(apikey);
-
-            Hilda.getLogger().addHandler(new LogReporter(this.hilda));
-
             this.hilda.start();
         } catch (final IllegalArgumentException e) {
-            e.printStackTrace();
+            Hilda.getLogger().log(Level.WARNING, "Encountered an exception while starting Hilda", e);
             System.exit(1);
         } catch (LoginException | InterruptedException
                 | RateLimitedException e) {
-            e.printStackTrace();
+            Hilda.getLogger().log(Level.WARNING, "Encountered an exception while logging in to Discord", e);
 
             this.tries++;
 

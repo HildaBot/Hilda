@@ -18,9 +18,9 @@ package ch.jamiete.hilda.listeners;
 import java.util.Scanner;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Util;
-import ch.jamiete.hilda.commands.ChannelCommand;
 import ch.jamiete.hilda.plugins.HildaPlugin;
 import net.dv8tion.jda.core.OnlineStatus;
 
@@ -48,24 +48,22 @@ public class ConsoleListener extends Thread {
                     this.hilda.getBot().getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
                     this.hilda.getCommandManager().shutdown();
 
-                    Hilda.getLogger().info("Shutting down commands...");
-                    for (final ChannelCommand command : this.hilda.getCommandManager().getChannelCommands()) {
-                        command.onShutdown();
-                    }
-                    Hilda.getLogger().info("Commands shut down!");
-
                     Hilda.getLogger().info("Shutting down plugins...");
                     for (final HildaPlugin plugin : this.hilda.getPluginManager().getPlugins()) {
                         plugin.onDisable();
                     }
                     Hilda.getLogger().info("Plugins shut down!");
 
+                    Hilda.getLogger().info("Saving configurations...");
+                    this.hilda.getConfigurationManager().save();
+                    Hilda.getLogger().info("Configurations saved!");
+
                     Hilda.getLogger().info("Shutting down executor...");
                     this.hilda.getExecutor().shutdown();
                     try {
                         this.hilda.getExecutor().awaitTermination(30, TimeUnit.SECONDS);
                     } catch (final InterruptedException e) {
-                        e.printStackTrace();
+                        Hilda.getLogger().log(Level.WARNING, "Encountered an exception whilst terminating executor", e);
                     }
                     Hilda.getLogger().info("Executor completed " + this.hilda.getExecutor().getCompletedTaskCount() + " with largest pool of " + this.hilda.getExecutor().getLargestPoolSize());
                     Hilda.getLogger().info("Executor shut down!");

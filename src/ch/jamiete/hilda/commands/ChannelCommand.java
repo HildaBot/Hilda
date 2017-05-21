@@ -16,10 +16,12 @@
 package ch.jamiete.hilda.commands;
 
 import ch.jamiete.hilda.Hilda;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 
 public abstract class ChannelCommand extends GenericCommand {
+    private CommandTranscendLevel transcend = CommandTranscendLevel.NONE;
 
     protected ChannelCommand(final Hilda hilda) {
         super(hilda);
@@ -34,17 +36,11 @@ public abstract class ChannelCommand extends GenericCommand {
     public abstract void execute(Message message, String[] arguments, String label);
 
     /**
-     * Called whenever the bot commences shutting down.
+     * Gets the command transcend level.
+     * @return
      */
-    public void onShutdown() {
-
-    }
-
-    /**
-     * Called whenever the bot has finished starting up.
-     */
-    public void onStartup() {
-
+    public CommandTranscendLevel getTranscend() {
+        return this.transcend;
     }
 
     /**
@@ -72,6 +68,40 @@ public abstract class ChannelCommand extends GenericCommand {
      */
     protected void reply(final Message received, final String outgoing) {
         received.getChannel().sendMessage(outgoing).queue();
+    }
+
+    /**
+     * Sets the command transcend level.
+     * @param transcend
+     */
+    public void setTranscend(final CommandTranscendLevel transcend) {
+        this.transcend = transcend;
+    }
+
+    /**
+     * Gets whether the command should transcend a channel ignore for a particular message.
+     * @param message The message to test
+     * @return Whether command should transcend
+     */
+    public boolean shouldTranscend(final Message message) {
+        switch (this.transcend) {
+            case NONE:
+            default:
+                return false;
+
+            case ALL:
+                return true;
+
+            case MANAGERS:
+                return message.getGuild().getMember(message.getAuthor()).hasPermission(Permission.MANAGE_SERVER);
+
+            case PERMISSION:
+                if (this.getMinimumPermission() == null) {
+                    return false;
+                } else {
+                    return message.getGuild().getMember(message.getAuthor()).hasPermission(message.getTextChannel(), this.getMinimumPermission());
+                }
+        }
     }
 
     /**
