@@ -16,6 +16,7 @@
 package ch.jamiete.hilda.commands;
 
 import ch.jamiete.hilda.Hilda;
+import ch.jamiete.hilda.Sanity;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
@@ -84,6 +85,12 @@ public abstract class ChannelCommand extends GenericCommand {
      * @return Whether command should transcend
      */
     public boolean shouldTranscend(final Message message) {
+        Sanity.nullCheck(message, "Message must not be null.");
+
+        if (message.getGuild().getMember(message.getAuthor()).hasPermission(Permission.ADMINISTRATOR)) {
+            return true;
+        }
+
         switch (this.transcend) {
             case NONE:
             default:

@@ -23,7 +23,6 @@ import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
 import ch.jamiete.hilda.Util;
-import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -134,7 +133,7 @@ public class CommandManager extends ListenerAdapter {
 
                     final ChannelCommand command = this.getChannelCommand(label);
 
-                    if (this.ignoredchannels.contains(event.getChannel().getId()) && (!command.shouldTranscend(event.getMessage()) || !event.getGuild().getMember(event.getAuthor()).hasPermission(Permission.ADMINISTRATOR))) {
+                    if (this.ignoredchannels.contains(event.getChannel().getId()) && !command.shouldTranscend(event.getMessage())) {
                         Hilda.getLogger().fine("Ignoring message due to ignore override");
                         return;
                     }
