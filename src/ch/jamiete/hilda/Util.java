@@ -18,6 +18,8 @@ package ch.jamiete.hilda;
 import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.User;
 
 public class Util {
 
@@ -84,6 +86,25 @@ public class Util {
         }
 
         return sb.toString().trim();
+    }
+
+    /**
+     * Gets the name of the Member in a format that is amenable to use in logs or administrator-facing contexts. <br>
+     * Wraps {@link #getName(User)} to avoid long lines of code.
+     * @param user The user whose name should be given
+     * @return The user's underlying username and their discriminator (e.g. BobDoe#1234)
+     */
+    public static String getName(final Member member) {
+        return Util.getName(member.getUser());
+    }
+
+    /**
+     * Gets the name of the User in a format that is amenable to use in logs or administrator-facing contexts.
+     * @param user The user whose name should be given
+     * @return The user's underlying username and their discriminator (e.g. BobDoe#1234)
+     */
+    public static String getName(final User user) {
+        return user.getName() + "#" + user.getDiscriminator();
     }
 
     /**
