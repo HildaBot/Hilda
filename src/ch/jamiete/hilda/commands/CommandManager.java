@@ -140,7 +140,7 @@ public class CommandManager extends ListenerAdapter {
 
                     // Check permissions
                     if (command.getMinimumPermission() != null && !event.getMember().hasPermission(event.getChannel(), command.getMinimumPermission())) {
-                        event.getChannel().sendMessage("You don't have permission to use that command.");
+                        event.getChannel().sendMessage("You don't have permission to use that command.").queue();
                         Hilda.getLogger().fine("    > No permission.");
                     } else {
                         command.execute(event.getMessage(), args, label);
@@ -150,7 +150,7 @@ public class CommandManager extends ListenerAdapter {
                 }
             } catch (final Exception e) {
                 Hilda.getLogger().log(Level.WARNING, "Encountered an exception while executing " + label + " for " + event.getMember().getEffectiveName() + " in " + event.getGuild().getName(), e);
-                event.getChannel().sendMessage("Something went wrong while executing that command.");
+                event.getChannel().sendMessage("Something went wrong while executing that command.").queue();
             }
         }
 
