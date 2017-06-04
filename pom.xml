@@ -20,7 +20,7 @@
     
     <groupId>ch.jamiete.hilda</groupId>
     <artifactId>Hilda</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
     <name>Hilda</name>
     <description>A modular Discord bot.</description>
     
