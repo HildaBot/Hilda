@@ -138,6 +138,11 @@ public class CommandManager extends ListenerAdapter {
                         return;
                     }
 
+                    if (command.isServerLocked() && !command.matchesLock(event.getMessage())) {
+                        Hilda.getLogger().fine("Ignoring message due to server lock");
+                        return;
+                    }
+
                     // Check permissions
                     if (command.getMinimumPermission() != null && !event.getMember().hasPermission(event.getChannel(), command.getMinimumPermission())) {
                         event.getChannel().sendMessage("You don't have permission to use that command.").queue();

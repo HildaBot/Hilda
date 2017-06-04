@@ -23,6 +23,7 @@ import net.dv8tion.jda.core.entities.MessageEmbed;
 
 public abstract class ChannelCommand extends GenericCommand {
     private CommandTranscendLevel transcend = CommandTranscendLevel.NONE;
+    private Long server;
 
     protected ChannelCommand(final Hilda hilda) {
         super(hilda);
@@ -37,11 +38,41 @@ public abstract class ChannelCommand extends GenericCommand {
     public abstract void execute(Message message, String[] arguments, String label);
 
     /**
+     * Gets the server ID that this command is locked to or null if not locked.
+     * @return The server ID locked to
+     */
+    public long getServerLock() {
+        return this.server;
+    }
+
+    /**
      * Gets the command transcend level.
      * @return
      */
     public CommandTranscendLevel getTranscend() {
         return this.transcend;
+    }
+
+    /**
+     * Gets whether the command is locked to a specific server.
+     * @return Whether command is locked
+     */
+    public boolean isServerLocked() {
+        return this.server != null;
+    }
+
+    /**
+     * Gets whether the server of an attempted command usage matches the server lock. <br>
+     * Returns false if there is no current lock on the command.
+     * @param message The message to check
+     * @return Whether server matches
+     */
+    public boolean matchesLock(final Message message) {
+        if (!this.isServerLocked()) {
+            return false;
+        }
+
+        return message.getGuild().getIdLong() == this.server.longValue();
     }
 
     /**
@@ -69,6 +100,15 @@ public abstract class ChannelCommand extends GenericCommand {
      */
     protected void reply(final Message received, final String outgoing) {
         received.getChannel().sendMessage(outgoing).queue();
+    }
+
+    /**
+     * Sets the server ID that this command should be locked to. <br>
+     * Pass null to remove the server lock.
+     * @param server The server ID to lock to
+     */
+    public void setServerLock(final long server) {
+        this.server = server;
     }
 
     /**
