@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Util;
-import ch.jamiete.hilda.plugins.HildaPlugin;
 import net.dv8tion.jda.core.OnlineStatus;
 
 public class ConsoleListener extends Thread {
@@ -49,9 +48,7 @@ public class ConsoleListener extends Thread {
                     this.hilda.getCommandManager().shutdown();
 
                     Hilda.getLogger().info("Shutting down plugins...");
-                    for (final HildaPlugin plugin : this.hilda.getPluginManager().getPlugins()) {
-                        plugin.onDisable();
-                    }
+                    this.hilda.getPluginManager().disablePlugins();
                     Hilda.getLogger().info("Plugins shut down!");
 
                     Hilda.getLogger().info("Saving configurations...");
