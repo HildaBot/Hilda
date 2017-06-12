@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import javax.security.auth.login.LoginException;
 import ch.jamiete.hilda.commands.CommandManager;
 import ch.jamiete.hilda.configuration.ConfigurationManager;
+import ch.jamiete.hilda.events.AnnotatedEventManager;
 import ch.jamiete.hilda.listeners.ConsoleListener;
 import ch.jamiete.hilda.plugins.PluginManager;
 import ch.jamiete.hilda.runnables.LogRotateTask;
@@ -48,7 +49,7 @@ public class Hilda {
     private PluginManager plugins;
 
     public Hilda(final String apikey) throws LoginException, IllegalArgumentException, InterruptedException, RateLimitedException {
-        this.bot = new JDABuilder(AccountType.BOT).setAutoReconnect(false).setToken(apikey).buildBlocking();
+        this.bot = new JDABuilder(AccountType.BOT).setAutoReconnect(false).setToken(apikey).setEventManager(new AnnotatedEventManager()).buildBlocking();
     }
 
     /**

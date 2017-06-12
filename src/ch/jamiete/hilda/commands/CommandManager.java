@@ -23,10 +23,10 @@ import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
 import ch.jamiete.hilda.Util;
+import ch.jamiete.hilda.events.EventHandler;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
-public class CommandManager extends ListenerAdapter {
+public class CommandManager {
     /**
      * The command prefix that the bot will respond to.
      */
@@ -109,7 +109,7 @@ public class CommandManager extends ListenerAdapter {
         return this.ignoredchannels.contains(id);
     }
 
-    @Override
+    @EventHandler
     public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
         if (event.getAuthor() == this.hilda.getBot().getSelfUser() || this.stopping) {
             return;
