@@ -43,7 +43,7 @@ import net.dv8tion.jda.core.hooks.IEventManager;
  * <pre><code>
  *     public class Foo
  *     {
- *        {@literal @SubscribeEvent}
+ *        {@literal @EventHandler}
  *         public void onMsg(MessageReceivedEvent event)
  *         {
  *             System.out.printf("%s: %s\n", event.getAuthor().getName(), event.getMessage().getContent());
@@ -53,7 +53,7 @@ import net.dv8tion.jda.core.hooks.IEventManager;
  *
  * @see net.dv8tion.jda.core.hooks.InterfacedEventManager
  * @see net.dv8tion.jda.core.hooks.IEventManager
- * @see net.dv8tion.jda.core.hooks.SubscribeEvent
+ * @see EventHandler
  */
 public class AnnotatedEventManager implements IEventManager {
     private final Set<Object> listeners = new HashSet<>();
@@ -96,7 +96,10 @@ public class AnnotatedEventManager implements IEventManager {
                         Hilda.getLogger().log(Level.WARNING, "Encountered a reflection exception while handling event", e1);
                     } catch (Throwable throwable) {
                         Hilda.getLogger().log(Level.WARNING, "An event listener encountered an exception", throwable);
-                        this.handle(new UnhandledEventExceptionEvent(event.getJDA(), 0L, throwable, event));
+
+                        if (!(event instanceof UnhandledEventExceptionEvent)) {
+                            this.handle(new UnhandledEventExceptionEvent(event.getJDA(), 0L, throwable, event));
+                        }
                     }
                 }));
             }
