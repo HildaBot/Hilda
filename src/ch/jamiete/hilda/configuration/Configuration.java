@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import ch.jamiete.hilda.Hilda;
@@ -56,6 +57,48 @@ public class Configuration {
         } catch (IOException e) {
             Hilda.getLogger().log(Level.WARNING, "Encountered an exception while loading configuration " + file.getName(), e);
             this.json = new JsonObject();
+        }
+    }
+
+    public boolean getBoolean(String name, boolean def) {
+        JsonElement ele = this.json.get(name);
+
+        if (ele == null) {
+            return def;
+        }
+
+        try {
+            return ele.getAsBoolean();
+        } catch (Exception e) {
+            return def;
+        }
+    }
+
+    public String getString(String name, String def) {
+        JsonElement ele = this.json.get(name);
+
+        if (ele == null) {
+            return def;
+        }
+
+        try {
+            return ele.getAsString();
+        } catch (Exception e) {
+            return def;
+        }
+    }
+
+    public int getInteger(String name, int def) {
+        JsonElement ele = this.json.get(name);
+
+        if (ele == null) {
+            return def;
+        }
+
+        try {
+            return ele.getAsInt();
+        } catch (Exception e) {
+            return def;
         }
     }
 
