@@ -37,11 +37,15 @@ public class ConfigurationManager {
         return this.getConfiguration(plugin, "config.json");
     }
 
-    public Configuration getConfiguration(HildaPlugin plugin, String name) {
-        String id = plugin.getPluginData().getName() + "-" + name.toLowerCase();
+    public Configuration getConfiguration(String name) {
+        String id = name.toLowerCase();
 
         if (!id.endsWith(".json")) {
             id = id + ".json";
+        }
+
+        if (id.contains("/")) {
+            id = id.replace('/', '-');
         }
 
         Configuration config;
@@ -62,5 +66,9 @@ public class ConfigurationManager {
 
         config.load();
         return config;
+    }
+
+    public Configuration getConfiguration(HildaPlugin plugin, String name) {
+        return this.getConfiguration(plugin.getPluginData().getName() + "-" + name.toLowerCase());
     }
 }
