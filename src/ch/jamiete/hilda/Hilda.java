@@ -27,7 +27,6 @@ import ch.jamiete.hilda.events.AnnotatedEventManager;
 import ch.jamiete.hilda.listeners.ConsoleListener;
 import ch.jamiete.hilda.plugins.PluginManager;
 import ch.jamiete.hilda.runnables.LogRotateTask;
-import ch.jamiete.hilda.sql.SQLManager;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -48,7 +47,6 @@ public class Hilda {
     private CommandManager commander;
     private ConfigurationManager configs;
     private PluginManager plugins;
-    private SQLManager sql;
 
     public Hilda(final String apikey) throws LoginException, IllegalArgumentException, InterruptedException, RateLimitedException {
         this.bot = new JDABuilder(AccountType.BOT).setAutoReconnect(false).setToken(apikey).setEventManager(new AnnotatedEventManager()).buildBlocking();
@@ -121,13 +119,6 @@ public class Hilda {
     }
 
     /**
-     * @return The {@link ch.jamiete.hilda.sql.SQLManager} instance
-     */
-    public SQLManager getSQLManager() {
-        return this.sql;
-    }
-
-    /**
      * Helper method
      * @return The current username of the bot
      */
@@ -153,7 +144,6 @@ public class Hilda {
         this.commander = new CommandManager(this);
         this.configs = new ConfigurationManager();
         this.plugins = new PluginManager(this);
-        this.sql = new SQLManager(this);
         Hilda.getLogger().info("Managers registered!");
 
         Hilda.getLogger().info("Registering listeners...");
