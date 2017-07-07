@@ -82,6 +82,7 @@
 									<mainClass>ch.jamiete.hilda.Start</mainClass>
 								</transformer>
 							</transformers>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
 						</configuration>
 					</execution>
 				</executions>
