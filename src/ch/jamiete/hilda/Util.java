@@ -16,8 +16,10 @@
 package ch.jamiete.hilda;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 
@@ -134,6 +136,58 @@ public class Util {
         time.set(Calendar.MILLISECOND, 0);
         time.add(Calendar.DAY_OF_MONTH, 1);
         return time.getTimeInMillis();
+    }
+
+    /**
+     * Gets a user-friendly String of the users passed. The users will be mentioned.
+     * @param users The users to list.
+     * @return The list of users. For example, "{@literal @Jane, @Bob and @Suzie}".
+     */
+    public static String getUsersAsString(final List<User> users) {
+        StringBuilder sb = new StringBuilder();
+
+        if (users.size() == 0) {
+            return "";
+        }
+
+        if (users.size() == 1) {
+            sb.append(users.get(0).getAsMention());
+        } else {
+            for (User user : users.subList(0, users.size() - 1)) {
+                sb.append(user.getAsMention()).append(", ");
+            }
+
+            sb.setLength(sb.length() - 2);
+            sb.append(" and ").append(users.get(users.size() - 1).getAsMention());
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Gets a user-friendly String of the channels passed.
+     * @param users The channels to list.
+     * @return The list of channels. For example, "#general, #voice and #bots".
+     */
+    public static String getChannelsAsString(final List<? extends Channel> channels) {
+        StringBuilder sb = new StringBuilder();
+
+        if (channels.size() == 0) {
+            return "";
+        }
+
+        if (channels.size() == 1) {
+            sb.append("#" + channels.get(0).getName());
+        } else {
+            for (Channel channel : channels.subList(0, channels.size() - 1)) {
+                sb.append("#" + channel.getName()).append(", ");
+            }
+
+            sb.setLength(sb.length() - 2);
+            sb.append(" and #").append(channels.get(channels.size() - 1).getName());
+        }
+
+        return sb.toString();
     }
 
 }
