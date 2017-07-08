@@ -80,7 +80,7 @@ public abstract class ChannelSeniorCommand extends ChannelCommand {
         mb.append(StringUtils.capitalize(this.getName()) + " Help", Formatting.UNDERLINE);
         mb.append("\n");
         mb.append(this.getDescription(), Formatting.ITALICS);
-        mb.append("\n");
+        mb.append("\n\n");
         mb.append("Use ").append(CommandManager.PREFIX + this.getName() + " <command>", Formatting.BOLD);
         mb.append(" to use this command:");
 
