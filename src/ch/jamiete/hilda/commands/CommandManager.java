@@ -32,7 +32,7 @@ public class CommandManager {
      */
     public static final String PREFIX = "!";
     private final List<ChannelCommand> channelcommands;
-    private final List<String> ignoredchannels;
+    private final List<String> ignoredchannels, ignoredusers;
     private boolean stopping = false;
     private final Hilda hilda;
 
@@ -41,11 +41,18 @@ public class CommandManager {
 
         this.channelcommands = new ArrayList<ChannelCommand>();
         this.ignoredchannels = new ArrayList<String>();
+        this.ignoredusers = new ArrayList<String>();
     }
 
     public void addIgnoredChannel(final String id) {
         if (!this.ignoredchannels.contains(id)) {
             this.ignoredchannels.add(id);
+        }
+    }
+
+    public void addIgnoredUser(final String id) {
+        if (!this.ignoredusers.contains(id)) {
+            this.ignoredusers.add(id);
         }
     }
 
@@ -109,9 +116,17 @@ public class CommandManager {
         return this.ignoredchannels.contains(id);
     }
 
+    public boolean isUserIgnored(final String id) {
+        return this.ignoredchannels.contains(id);
+    }
+
     @EventHandler
     public void onGuildMessageReceived(final GuildMessageReceivedEvent event) {
         if (event.getAuthor() == this.hilda.getBot().getSelfUser() || this.stopping) {
+            return;
+        }
+
+        if (this.ignoredusers.contains(event.getAuthor().getId())) {
             return;
         }
 
@@ -184,6 +199,10 @@ public class CommandManager {
 
     public void removeIgnoredChannel(final String id) {
         this.ignoredchannels.remove(id);
+    }
+
+    public void removeIgnoredUser(final String id) {
+        this.ignoredusers.remove(id);
     }
 
     public void shutdown() {
