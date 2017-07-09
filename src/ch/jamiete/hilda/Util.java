@@ -28,6 +28,10 @@ import net.dv8tion.jda.core.entities.User;
 
 public class Util {
 
+    public static String sanitise(final String input) {
+        return input.replace("@everyone", "\\@\u200Beveryone").replace("@here", "\\@\u200Bhere");
+    }
+
     /**
      * Turns a String[] into a single String separated by the passed separator.
      * @param startIndex The index to start combining from.
