@@ -103,6 +103,10 @@ public class CommandManager {
         return Collections.unmodifiableList(this.ignoredchannels);
     }
 
+    public List<String> getIgnoredUsers() {
+        return Collections.unmodifiableList(this.ignoredusers);
+    }
+
     /**
      * Checks whether a command responds to the label. Case insensitive.
      * @param label The label to test for.
