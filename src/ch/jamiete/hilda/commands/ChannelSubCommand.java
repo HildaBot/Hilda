@@ -38,4 +38,12 @@ public abstract class ChannelSubCommand extends ChannelCommand {
         this.reply(received, "Incorrect usage. " + CommandManager.PREFIX + this.senior.getName() + " " + label + " " + params);
     }
 
+    /**
+     * Gets the senior command for this subcommand.
+     * @return The senior command.
+     */
+    protected ChannelSeniorCommand getSenior() {
+        return this.senior;
+    }
+
 }
