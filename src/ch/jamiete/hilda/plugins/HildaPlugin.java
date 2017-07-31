@@ -44,4 +44,8 @@ public abstract class HildaPlugin {
 
     }
 
+    public void save() {
+
+    }
+
 }

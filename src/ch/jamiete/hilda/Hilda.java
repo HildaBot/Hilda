@@ -26,6 +26,7 @@ import ch.jamiete.hilda.configuration.ConfigurationManager;
 import ch.jamiete.hilda.events.AnnotatedEventManager;
 import ch.jamiete.hilda.listeners.ConsoleListener;
 import ch.jamiete.hilda.plugins.PluginManager;
+import ch.jamiete.hilda.runnables.HeartbeatTask;
 import ch.jamiete.hilda.runnables.LogRotateTask;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -139,6 +140,8 @@ public class Hilda {
         final long rotate = this.getNextMidnightInMillis("GMT+10") - System.currentTimeMillis();
         this.executor.scheduleAtFixedRate(new LogRotateTask(), rotate, 86400000, TimeUnit.MILLISECONDS); // At midnight then every 24 hours
         Hilda.getLogger().info("Rotating log files in " + Util.getFriendlyTime(rotate));
+
+        this.executor.scheduleAtFixedRate(new HeartbeatTask(this), 5, 5, TimeUnit.MINUTES);
 
         Hilda.getLogger().info("Registering managers...");
         this.commander = new CommandManager(this);
