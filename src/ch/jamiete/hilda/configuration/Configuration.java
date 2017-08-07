@@ -21,6 +21,7 @@ import java.nio.charset.Charset;
 import java.util.logging.Level;
 import org.apache.commons.io.FileUtils;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -130,6 +131,11 @@ public class Configuration {
         } catch (Exception e) {
             return def;
         }
+    }
+
+    public JsonArray getArray(String name) {
+        JsonArray array = this.json.getAsJsonArray(name);
+        return array == null ? new JsonArray() : array;
     }
 
 }
