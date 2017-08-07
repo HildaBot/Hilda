@@ -47,8 +47,14 @@ public class Configuration {
             charset = Charset.defaultCharset();
         }
 
+        String output = new Gson().toJson(json);
+
+        if (output.equals("{}")) {
+            return;
+        }
+
         try {
-            FileUtils.write(file, new Gson().toJson(json), charset);
+            FileUtils.write(file, output, charset);
         } catch (IOException e) {
             Hilda.getLogger().log(Level.WARNING, "Encountered an exception when saving config " + file.getName(), e);
         }
@@ -73,6 +79,14 @@ public class Configuration {
         } catch (IOException e) {
             Hilda.getLogger().log(Level.WARNING, "Encountered an exception while loading configuration " + file.getName(), e);
             this.json = new JsonObject();
+        }
+
+        if (new Gson().toJson(this.json).equals("{}")) {
+            try {
+                file.delete();
+            } catch (Exception e) {
+                // Ignore
+            }
         }
     }
 
