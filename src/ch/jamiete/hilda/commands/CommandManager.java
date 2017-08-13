@@ -147,7 +147,7 @@ public class CommandManager {
 
             try {
                 if (this.isChannelCommand(label)) {
-                    Hilda.getLogger().info("Executing " + label + " for " + event.getMember().getEffectiveName() + " in " + event.getGuild().getName());
+                    Hilda.getLogger().info("Executing " + label + " for " + Util.getName(event.getAuthor()) + " (" + event.getAuthor().getId() + ") in " + event.getGuild().getName() + " (" + event.getGuild().getId() + ")");
                     Hilda.getLogger().fine("    > Executing command " + label + "...");
 
                     final ChannelCommand command = this.getChannelCommand(label);
