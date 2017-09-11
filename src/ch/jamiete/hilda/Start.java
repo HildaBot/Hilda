@@ -109,7 +109,7 @@ public class Start {
 
             if (this.tries < 5) {
                 Hilda.getLogger().warning("Failed to login; retrying...");
-                this.hilda.bot.shutdown(true);
+                this.hilda.bot.shutdown();
                 this.hilda = null;
                 this.start(apikey);
             } else {
