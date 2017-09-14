@@ -18,10 +18,12 @@ package ch.jamiete.hilda.plugins;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -29,19 +31,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 import com.google.gson.Gson;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
-import java.lang.reflect.Method;
 
 public class PluginManager {
-
-    private final Map<String, PluginData> pluginJsons = Collections.synchronizedMap(new HashMap<>());
-    private final List<HildaPlugin> plugins = Collections.synchronizedList(new ArrayList<>());
+    private final List<HildaPlugin> plugins = Collections.synchronizedList(new ArrayList<HildaPlugin>());
     private final Hilda hilda;
 
     public PluginManager(final Hilda hilda) {
@@ -100,24 +98,31 @@ public class PluginManager {
         return Collections.unmodifiableList(this.plugins);
     }
 
+    private boolean isLoaded(final PluginData data) {
+        return this.plugins.stream().filter(p -> p.getPluginData().equals(data)).findAny().isPresent();
+    }
+
+    private boolean isLoaded(String name) {
+        return this.plugins.stream().filter(p -> p.getPluginData().name.equals(name)).findAny().isPresent();
+    }
+
     private boolean loadPlugin(final PluginData data) {
-        if (data.loaded) {
+        if (this.isLoaded(data)) {
             return true;
         }
 
         try {
             URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-            Class sysclass = URLClassLoader.class;
-            Method method = sysclass.getDeclaredMethod("addURL", new Class[]{URL.class});
+            Class<URLClassLoader> sysclass = URLClassLoader.class;
+            Method method = sysclass.getDeclaredMethod("addURL", new Class[] { URL.class });
             method.setAccessible(true);
-            method.invoke(sysloader, new Object[]{data.pluginFile.toURI().toURL()});
+            method.invoke(sysloader, new Object[] { data.pluginFile.toURI().toURL() });
 
             final Class<?> mainClass = Class.forName(data.mainClass);
 
             if (mainClass != null) {
                 if (!HildaPlugin.class.isAssignableFrom(mainClass)) {
                     Hilda.getLogger().severe("Could not load plugin " + data.getName() + " because its main class did not implement HildaPlugin!");
-                    this.pluginJsons.remove(data.getName());
                     return false;
                 }
 
@@ -129,25 +134,34 @@ public class PluginManager {
 
                 this.plugins.add(newPlugin);
 
+                try {
+                    newPlugin.onLoad();
+                } catch (Exception e) {
+                    Hilda.getLogger().log(Level.WARNING, "Encountered exception when calling load method of plugin " + data.name + ". It may not have properly loaded and may cause errors.", e);
+                }
+
                 Hilda.getLogger().info("Loaded plugin " + data.name);
-
-                data.loaded = true;
-
                 return true;
             }
         } catch (final Exception ex) {
-            Logger.getLogger(PluginManager.class.getName()).log(Level.SEVERE, null, ex);
+            Hilda.getLogger().log(Level.WARNING, "Encountered exception when loading plugin " + data.name, ex);
         }
 
-        this.pluginJsons.remove(data.getName());
         return false;
     }
 
-    private void loadPluginJson(final File file) {
+    /**
+     * Attempts to load plugin data from the {@code plugin.json} file.
+     * @param file
+     * @return the plugin data or {@code null} if no data could be loaded
+     * @throws IllegalArgumentException if any of the conditions of a plugin data file are not met
+     */
+    private PluginData loadPluginData(final File file) {
+        PluginData data = null;
+
         try {
             final ZipFile zipFile = new ZipFile(file);
             final Enumeration<? extends ZipEntry> entries = zipFile.entries();
-            PluginData data = null;
 
             while (entries.hasMoreElements()) {
                 final ZipEntry entry = entries.nextElement();
@@ -162,7 +176,6 @@ public class PluginManager {
                     Sanity.nullCheck(data.author, "A plugin must define its author.");
 
                     data.pluginFile = file;
-                    data.loaded = false;
 
                     if (data.dependencies == null) {
                         data.dependencies = new String[0];
@@ -171,16 +184,11 @@ public class PluginManager {
             }
 
             zipFile.close();
-
-            if (data == null) {
-                Hilda.getLogger().severe("Could not load plugin " + file.getName() + " as it has no JSON file!");
-                return;
-            }
-
-            this.pluginJsons.put(data.name, data);
         } catch (final Exception ex) {
-            Logger.getLogger(PluginManager.class.getName()).log(Level.SEVERE, null, ex);
+            Hilda.getLogger().log(Level.SEVERE, "Encountered exception when trying to load plugin JSON for " + file.getName(), ex);
         }
+
+        return data;
     }
 
     public void loadPlugins() {
@@ -191,51 +199,143 @@ public class PluginManager {
             return;
         }
 
-        // load plugin jsons
+        final Map<String, PluginData> jars = new HashMap<String, PluginData>();
+        final Map<String, List<String>> dependencies = new HashMap<String, List<String>>();
+        final Map<String, List<String>> load_after = new HashMap<String, List<String>>();
+
+        // Load all data about valid plugins
         for (final File file : pluginsDir.listFiles()) {
+            PluginData data = null;
+
             if (file.isFile() && file.getName().endsWith(".jar")) {
-                this.loadPluginJson(file);
-            }
-        }
+                try {
+                    data = this.loadPluginData(file);
 
-        for (final PluginData dat : this.pluginJsons.values()) {
-            this.tryLoadPlugin(dat);
-        }
-
-        // invoke newPlugin.onLoad after every plugin is loaded, because if the plugin has dependencies they may not have been loaded yet
-        for (final HildaPlugin newPlugin : this.getPlugins()) {
-            newPlugin.onLoad();
-        }
-    }
-
-    /**
-     * Load plugins dependencies before loading the plugin itself
-     *
-     * TODO: add counter so it doesn't get stuck recursing
-     */
-    private boolean tryLoadPlugin(final PluginData plug) {
-        if (plug.loaded) {
-            return true;
-        }
-
-        for (final String depName : plug.getDependencies()) {
-            final PluginData depJson = this.pluginJsons.get(depName);
-
-            if (depJson == null) {
-                return false; // missing dependency!
-            }
-
-            if (depJson.dependencies.length == 0) { // has no dependencies
-                if (!this.loadPlugin(depJson)) {
-                    return false; // couldn't load plugin!
+                    if (data == null) {
+                        Hilda.getLogger().warning("Failed to load plugin data for " + file.getName());
+                        continue;
+                    } else {
+                        jars.put(data.name, data);
+                    }
+                } catch (Exception e) {
+                    Hilda.getLogger().log(Level.WARNING, "Failed to load plugin data for " + file.getName(), e);
+                    continue;
                 }
             } else {
-                if (!this.tryLoadPlugin(plug)) {
-                    return false;
+                continue;
+            }
+
+            if (data.dependencies != null && data.dependencies.length > 0) {
+                dependencies.put(data.name, new ArrayList<String>(Arrays.asList(data.dependencies)));
+            }
+
+            if (data.load_after != null && data.load_after.length > 0) {
+                load_after.put(data.name, new ArrayList<String>(Arrays.asList(data.load_after)));
+            }
+        }
+
+        // Remove any load after value that isn't known to the plugin loader
+        for (List<String> list : load_after.values()) {
+            Iterator<String> values = list.iterator();
+
+            while (values.hasNext()) {
+                String name = values.next();
+
+                if (!jars.containsKey(name)) {
+                    values.remove();
                 }
             }
         }
 
-        return this.loadPlugin(plug);
+        // Attempt to load all jars
+        while (!jars.isEmpty()) {
+            boolean missing = true;
+            Iterator<String> iterator = jars.keySet().iterator();
+
+            while (iterator.hasNext()) {
+                String plugin_name = iterator.next();
+
+                // Remove any dependencies we've already loaded, or fail
+                if (dependencies.containsKey(plugin_name)) {
+                    Iterator<String> dependency_iterator = dependencies.get(plugin_name).iterator();
+
+                    while (dependency_iterator.hasNext()) {
+                        String dependency = dependency_iterator.next();
+
+                        if (this.isLoaded(dependency)) {
+                            dependency_iterator.remove();
+                        } else if (!jars.containsKey(dependency)) {
+                            iterator.remove();
+                            dependency_iterator.remove();
+                            load_after.remove(plugin_name);
+
+                            Hilda.getLogger().warning("Failed to load plugin " + plugin_name + " because dependency " + dependency + " could not be found!");
+
+                            break;
+                        }
+                    }
+
+                    if (dependencies.containsKey(plugin_name) && dependencies.get(plugin_name).isEmpty()) {
+                        dependencies.remove(plugin_name);
+                    }
+                }
+
+                // Remove any load after value we've already loaded
+                if (load_after.containsKey(plugin_name)) {
+                    Iterator<String> load_after_iterator = load_after.get(plugin_name).iterator();
+
+                    while (load_after_iterator.hasNext()) {
+                        String loadafter = load_after_iterator.next();
+
+                        if (this.isLoaded(loadafter)) {
+                            load_after_iterator.remove();
+                        }
+                    }
+
+                    if (load_after.containsKey(plugin_name) && load_after.get(plugin_name).isEmpty()) {
+                        load_after.remove(plugin_name);
+                    }
+                }
+
+                // No dependencies remain unloaded
+                if (!dependencies.containsKey(plugin_name) || load_after.containsKey(plugin_name) && jars.containsKey(plugin_name)) {
+                    boolean successful = this.loadPlugin(jars.get(plugin_name));
+
+                    if (successful) {
+                        iterator.remove();
+                        missing = false;
+                        continue;
+                    }
+                }
+            } // End of jar iteration
+
+            // Try to load anything
+            if (missing) {
+                iterator = jars.keySet().iterator();
+
+                while (iterator.hasNext()) {
+                    String plugin_name = iterator.next();
+
+                    if (!dependencies.containsKey(plugin_name)) {
+                        iterator.remove();
+                        load_after.remove(plugin_name);
+
+                        if (this.loadPlugin(jars.get(plugin_name))) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // No plugins without a dependency remain
+            if (missing) {
+                iterator = jars.keySet().iterator();
+
+                while (iterator.hasNext()) {
+                    iterator.remove();
+                    Hilda.getLogger().warning("Absolutely could not load " + iterator.next() + " and have given up trying.");
+                }
+            }
+        }
     }
 }

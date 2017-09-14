@@ -25,10 +25,10 @@ public class PluginData {
     protected String version;
     protected String author;
     protected String[] dependencies;
+    protected String[] load_after;
 
     // internal fields
     protected File pluginFile;
-    protected boolean loaded;
 
     public File getPluginFile() {
         return pluginFile;
@@ -48,6 +48,10 @@ public class PluginData {
 
     public String[] getDependencies() {
         return dependencies;
+    }
+
+    public String[] getLoadAfter() {
+        return this.load_after;
     }
 
 }
