@@ -13,7 +13,7 @@
 
 	<groupId>ch.jamiete.hilda</groupId>
 	<artifactId>Hilda</artifactId>
-	<version>1.1.4</version>
+	<version>1.1.5</version>
 	<name>Hilda</name>
 	<description>A modular Discord bot.</description>
 
@@ -21,7 +21,7 @@
 		<dependency>
 			<groupId>net.dv8tion</groupId>
 			<artifactId>JDA</artifactId>
-			<version>3.3.0_265</version>
+			<version>3.3.0_270</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
