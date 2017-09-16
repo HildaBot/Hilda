@@ -33,6 +33,7 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
+import net.dv8tion.jda.core.utils.SimpleLog;
 
 public class Hilda {
     private static final Logger LOGGER = Logger.getLogger("Hilda");
@@ -51,6 +52,11 @@ public class Hilda {
 
     public Hilda(final String apikey) throws LoginException, IllegalArgumentException, InterruptedException, RateLimitedException {
         this.bot = new JDABuilder(AccountType.BOT).setAutoReconnect(false).setToken(apikey).setEventManager(new AnnotatedEventManager()).buildBlocking();
+
+        if (Start.DEBUG) {
+            SimpleLog.getLog("JDA").setLevel(net.dv8tion.jda.core.utils.SimpleLog.Level.ALL);
+            SimpleLog.LEVEL = SimpleLog.Level.ALL;
+        }
     }
 
     /**
