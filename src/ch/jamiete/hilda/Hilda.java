@@ -51,7 +51,7 @@ public class Hilda {
     private PluginManager plugins;
 
     public Hilda(final String apikey) throws LoginException, IllegalArgumentException, InterruptedException, RateLimitedException {
-        this.bot = new JDABuilder(AccountType.BOT).setAutoReconnect(false).setToken(apikey).setEventManager(new AnnotatedEventManager()).buildBlocking();
+        this.bot = new JDABuilder(AccountType.BOT).setAutoReconnect(false).setToken(apikey).setEventManager(new AnnotatedEventManager()).setStatus(OnlineStatus.DO_NOT_DISTURB).buildBlocking();
 
         if (Start.DEBUG) {
             SimpleLog.getLog("JDA").setLevel(net.dv8tion.jda.core.utils.SimpleLog.Level.ALL);
@@ -137,7 +137,6 @@ public class Hilda {
         this.bot.setAutoReconnect(true);
         Hilda.getLogger().info("Connected to server!");
 
-        this.bot.getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
 
         this.executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         this.executor.setRemoveOnCancelPolicy(true);
