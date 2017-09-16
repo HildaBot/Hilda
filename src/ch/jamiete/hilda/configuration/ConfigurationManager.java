@@ -30,7 +30,7 @@ public class ConfigurationManager {
             configs.forEach((s, c) -> c.save());
         }
 
-        Hilda.getLogger().info("Saved all " + configs.size() + " configuration files.");
+        Hilda.getLogger().fine("Saved all " + configs.size() + " configuration files.");
     }
 
     public Configuration getConfiguration(HildaPlugin plugin) {
