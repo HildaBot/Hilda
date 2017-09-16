@@ -21,12 +21,20 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import ch.jamiete.hilda.runnables.MessageDeletionTask;
 import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
 
 public class Util {
+    private static Hilda HILDA = null;
+
+    protected static void setHilda(Hilda hilda) {
+        Util.HILDA = hilda;
+    }
 
     public static String sanitise(final String input) {
         return input.replace("@everyone", "\\@\u200Beveryone").replace("@here", "\\@\u200Bhere");
@@ -53,6 +61,12 @@ public class Util {
 
         builder.deleteCharAt(builder.length() - seperator.length());
         return builder.toString();
+    }
+
+    public static Consumer<Message> deleteAfter(int seconds) {
+        return (message) -> {
+            HILDA.getExecutor().schedule(new MessageDeletionTask(message), seconds, TimeUnit.SECONDS);
+        };
     }
 
     /**

@@ -137,6 +137,7 @@ public class Hilda {
         this.bot.setAutoReconnect(true);
         Hilda.getLogger().info("Connected to server!");
 
+        Util.setHilda(this);
 
         this.executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         this.executor.setRemoveOnCancelPolicy(true);
