@@ -22,7 +22,12 @@ import net.dv8tion.jda.core.utils.SimpleLog.LogListener;
 public class JDALogger implements LogListener {
 
     @Override
-    public void onLog(SimpleLog log, Level level, Object object) {
+    public void onError(final SimpleLog log, final Throwable thrown) {
+        Hilda.getLogger().log(java.util.logging.Level.WARNING, "JDA encountered an exception.", thrown);
+    }
+
+    @Override
+    public void onLog(final SimpleLog log, final Level level, final Object object) {
         if (level.getPriority() < 3 && !Start.DEBUG) {
             return;
         }
@@ -61,11 +66,6 @@ public class JDALogger implements LogListener {
         }
 
         Hilda.getLogger().logp(newlevel, null, null, message);
-    }
-
-    @Override
-    public void onError(SimpleLog log, Throwable thrown) {
-        Hilda.getLogger().log(java.util.logging.Level.WARNING, "JDA encountered an exception.", thrown);
     }
 
 }

@@ -102,7 +102,7 @@ public class PluginManager {
         return this.plugins.stream().filter(p -> p.getPluginData().equals(data)).findAny().isPresent();
     }
 
-    private boolean isLoaded(String name) {
+    private boolean isLoaded(final String name) {
         return this.plugins.stream().filter(p -> p.getPluginData().name.equals(name)).findAny().isPresent();
     }
 
@@ -112,9 +112,9 @@ public class PluginManager {
         }
 
         try {
-            URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-            Class<URLClassLoader> sysclass = URLClassLoader.class;
-            Method method = sysclass.getDeclaredMethod("addURL", new Class[] { URL.class });
+            final URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+            final Class<URLClassLoader> sysclass = URLClassLoader.class;
+            final Method method = sysclass.getDeclaredMethod("addURL", new Class[] { URL.class });
             method.setAccessible(true);
             method.invoke(sysloader, new Object[] { data.pluginFile.toURI().toURL() });
 
@@ -136,7 +136,7 @@ public class PluginManager {
 
                 try {
                     newPlugin.onLoad();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     Hilda.getLogger().log(Level.WARNING, "Encountered exception when calling load method of plugin " + data.name + ". It may not have properly loaded and may cause errors.", e);
                 }
 
@@ -217,7 +217,7 @@ public class PluginManager {
                     } else {
                         jars.put(data.name, data);
                     }
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     Hilda.getLogger().log(Level.WARNING, "Failed to load plugin data for " + file.getName(), e);
                     continue;
                 }
@@ -235,11 +235,11 @@ public class PluginManager {
         }
 
         // Remove any load after value that isn't known to the plugin loader
-        for (List<String> list : load_after.values()) {
-            Iterator<String> values = list.iterator();
+        for (final List<String> list : load_after.values()) {
+            final Iterator<String> values = list.iterator();
 
             while (values.hasNext()) {
-                String name = values.next();
+                final String name = values.next();
 
                 if (!jars.containsKey(name)) {
                     values.remove();
@@ -253,14 +253,14 @@ public class PluginManager {
             Iterator<String> iterator = jars.keySet().iterator();
 
             while (iterator.hasNext()) {
-                String plugin_name = iterator.next();
+                final String plugin_name = iterator.next();
 
                 // Remove any dependencies we've already loaded, or fail
                 if (dependencies.containsKey(plugin_name)) {
-                    Iterator<String> dependency_iterator = dependencies.get(plugin_name).iterator();
+                    final Iterator<String> dependency_iterator = dependencies.get(plugin_name).iterator();
 
                     while (dependency_iterator.hasNext()) {
-                        String dependency = dependency_iterator.next();
+                        final String dependency = dependency_iterator.next();
 
                         if (this.isLoaded(dependency)) {
                             dependency_iterator.remove();
@@ -282,10 +282,10 @@ public class PluginManager {
 
                 // Remove any load after value we've already loaded
                 if (load_after.containsKey(plugin_name)) {
-                    Iterator<String> load_after_iterator = load_after.get(plugin_name).iterator();
+                    final Iterator<String> load_after_iterator = load_after.get(plugin_name).iterator();
 
                     while (load_after_iterator.hasNext()) {
-                        String loadafter = load_after_iterator.next();
+                        final String loadafter = load_after_iterator.next();
 
                         if (this.isLoaded(loadafter)) {
                             load_after_iterator.remove();
@@ -299,7 +299,7 @@ public class PluginManager {
 
                 // No dependencies remain unloaded
                 if (!dependencies.containsKey(plugin_name) || load_after.containsKey(plugin_name) && jars.containsKey(plugin_name)) {
-                    boolean successful = this.loadPlugin(jars.get(plugin_name));
+                    final boolean successful = this.loadPlugin(jars.get(plugin_name));
 
                     if (successful) {
                         iterator.remove();
@@ -314,7 +314,7 @@ public class PluginManager {
                 iterator = jars.keySet().iterator();
 
                 while (iterator.hasNext()) {
-                    String plugin_name = iterator.next();
+                    final String plugin_name = iterator.next();
 
                     if (!dependencies.containsKey(plugin_name)) {
                         iterator.remove();

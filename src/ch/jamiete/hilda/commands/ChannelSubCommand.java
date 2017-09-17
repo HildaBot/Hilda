@@ -28,6 +28,14 @@ public abstract class ChannelSubCommand extends ChannelCommand {
     }
 
     /**
+     * Gets the senior command for this subcommand.
+     * @return The senior command.
+     */
+    protected ChannelSeniorCommand getSenior() {
+        return this.senior;
+    }
+
+    /**
      * Sends a reply to the channel in which the message was received that the argument was not recognised and shows the label that was used.
      * @param received The message to be replied to.
      * @param params The parameters that the command recognises and can respond to.
@@ -36,14 +44,6 @@ public abstract class ChannelSubCommand extends ChannelCommand {
     @Override
     protected void usage(final Message received, final String params, final String label) {
         this.reply(received, "Incorrect usage. " + CommandManager.PREFIX + this.senior.getName() + " " + label + " " + params);
-    }
-
-    /**
-     * Gets the senior command for this subcommand.
-     * @return The senior command.
-     */
-    protected ChannelSeniorCommand getSenior() {
-        return this.senior;
     }
 
 }

@@ -23,21 +23,17 @@ import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.plugins.HildaPlugin;
 
 public class ConfigurationManager {
-    private Map<String, Configuration> configs = Collections.synchronizedMap(new HashMap<String, Configuration>());
+    private final Map<String, Configuration> configs = Collections.synchronizedMap(new HashMap<String, Configuration>());
 
-    public void save() {
-        synchronized (this.configs) {
-            configs.forEach((s, c) -> c.save());
-        }
-
-        Hilda.getLogger().fine("Saved all " + configs.size() + " configuration files.");
-    }
-
-    public Configuration getConfiguration(HildaPlugin plugin) {
+    public Configuration getConfiguration(final HildaPlugin plugin) {
         return this.getConfiguration(plugin, "config.json");
     }
 
-    public Configuration getConfiguration(String name) {
+    public Configuration getConfiguration(final HildaPlugin plugin, final String name) {
+        return this.getConfiguration(plugin.getPluginData().getName() + "-" + name.toLowerCase());
+    }
+
+    public Configuration getConfiguration(final String name) {
         String id = name.toLowerCase();
 
         if (!id.endsWith(".json")) {
@@ -51,7 +47,7 @@ public class ConfigurationManager {
         Configuration config;
 
         synchronized (this.configs) {
-            config = configs.get(id);
+            config = this.configs.get(id);
         }
 
         if (config != null) {
@@ -68,7 +64,11 @@ public class ConfigurationManager {
         return config;
     }
 
-    public Configuration getConfiguration(HildaPlugin plugin, String name) {
-        return this.getConfiguration(plugin.getPluginData().getName() + "-" + name.toLowerCase());
+    public void save() {
+        synchronized (this.configs) {
+            this.configs.forEach((s, c) -> c.save());
+        }
+
+        Hilda.getLogger().fine("Saved all " + this.configs.size() + " configuration files.");
     }
 }

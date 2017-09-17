@@ -28,10 +28,10 @@ import com.google.gson.JsonParser;
 import ch.jamiete.hilda.Hilda;
 
 public class Configuration {
-    private File file;
+    private final File file;
     private JsonObject json;
 
-    public Configuration(File file) {
+    public Configuration(final File file) {
         this.file = file;
     }
 
@@ -39,60 +39,13 @@ public class Configuration {
         return this.json;
     }
 
-    public void save() {
-        Charset charset = null;
-
-        try {
-            charset = Charset.forName("UTF-8");
-        } catch (Exception e) {
-            charset = Charset.defaultCharset();
-        }
-
-        String output = new Gson().toJson(json);
-
-        if (output.equals("{}")) {
-            return;
-        }
-
-        try {
-            FileUtils.write(file, output, charset);
-        } catch (IOException e) {
-            Hilda.getLogger().log(Level.WARNING, "Encountered an exception when saving config " + file.getName(), e);
-        }
+    public JsonArray getArray(final String name) {
+        final JsonArray array = this.json.getAsJsonArray(name);
+        return array == null ? new JsonArray() : array;
     }
 
-    public void load() {
-        if (!file.exists()) {
-            this.json = new JsonObject();
-            return;
-        }
-
-        Charset charset = null;
-
-        try {
-            charset = Charset.forName("UTF-8");
-        } catch (Exception e) {
-            charset = Charset.defaultCharset();
-        }
-
-        try {
-            this.json = new JsonParser().parse(FileUtils.readFileToString(file, charset)).getAsJsonObject();
-        } catch (IOException e) {
-            Hilda.getLogger().log(Level.WARNING, "Encountered an exception while loading configuration " + file.getName(), e);
-            this.json = new JsonObject();
-        }
-
-        if (new Gson().toJson(this.json).equals("{}")) {
-            try {
-                file.delete();
-            } catch (Exception e) {
-                // Ignore
-            }
-        }
-    }
-
-    public boolean getBoolean(String name, boolean def) {
-        JsonElement ele = this.json.get(name);
+    public boolean getBoolean(final String name, final boolean def) {
+        final JsonElement ele = this.json.get(name);
 
         if (ele == null) {
             return def;
@@ -100,27 +53,13 @@ public class Configuration {
 
         try {
             return ele.getAsBoolean();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return def;
         }
     }
 
-    public String getString(String name, String def) {
-        JsonElement ele = this.json.get(name);
-
-        if (ele == null) {
-            return def;
-        }
-
-        try {
-            return ele.getAsString();
-        } catch (Exception e) {
-            return def;
-        }
-    }
-
-    public int getInteger(String name, int def) {
-        JsonElement ele = this.json.get(name);
+    public int getInteger(final String name, final int def) {
+        final JsonElement ele = this.json.get(name);
 
         if (ele == null) {
             return def;
@@ -128,14 +67,75 @@ public class Configuration {
 
         try {
             return ele.getAsInt();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return def;
         }
     }
 
-    public JsonArray getArray(String name) {
-        JsonArray array = this.json.getAsJsonArray(name);
-        return array == null ? new JsonArray() : array;
+    public String getString(final String name, final String def) {
+        final JsonElement ele = this.json.get(name);
+
+        if (ele == null) {
+            return def;
+        }
+
+        try {
+            return ele.getAsString();
+        } catch (final Exception e) {
+            return def;
+        }
+    }
+
+    public void load() {
+        if (!this.file.exists()) {
+            this.json = new JsonObject();
+            return;
+        }
+
+        Charset charset = null;
+
+        try {
+            charset = Charset.forName("UTF-8");
+        } catch (final Exception e) {
+            charset = Charset.defaultCharset();
+        }
+
+        try {
+            this.json = new JsonParser().parse(FileUtils.readFileToString(this.file, charset)).getAsJsonObject();
+        } catch (final IOException e) {
+            Hilda.getLogger().log(Level.WARNING, "Encountered an exception while loading configuration " + this.file.getName(), e);
+            this.json = new JsonObject();
+        }
+
+        if (new Gson().toJson(this.json).equals("{}")) {
+            try {
+                this.file.delete();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    public void save() {
+        Charset charset = null;
+
+        try {
+            charset = Charset.forName("UTF-8");
+        } catch (final Exception e) {
+            charset = Charset.defaultCharset();
+        }
+
+        final String output = new Gson().toJson(this.json);
+
+        if (output.equals("{}")) {
+            return;
+        }
+
+        try {
+            FileUtils.write(this.file, output, charset);
+        } catch (final IOException e) {
+            Hilda.getLogger().log(Level.WARNING, "Encountered an exception when saving config " + this.file.getName(), e);
+        }
     }
 
 }

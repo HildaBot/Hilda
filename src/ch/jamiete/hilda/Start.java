@@ -56,7 +56,7 @@ public class Start {
     public static void setupLogging() {
         Hilda.getLogger().setUseParentHandlers(false);
 
-        for (Handler handler : Hilda.getLogger().getHandlers()) {
+        for (final Handler handler : Hilda.getLogger().getHandlers()) {
             if (handler instanceof ConsoleHandler) {
                 Hilda.getLogger().removeHandler(handler);
             }

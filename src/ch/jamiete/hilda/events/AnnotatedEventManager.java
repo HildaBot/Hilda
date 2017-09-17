@@ -1,8 +1,8 @@
 /*******************************************************************************
  * Copyright 2015-2017 Austin Keener & Michael Ritter
  *
- * Modifications copyright 2017 jamietech 
- * 
+ * Modifications copyright 2017 jamietech
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,40 +59,26 @@ public class AnnotatedEventManager implements IEventManager {
     private final Map<Class<? extends Event>, Map<Object, List<Method>>> methods = new HashMap<>();
 
     @Override
-    public void register(Object listener) {
-        if (listeners.add(listener)) {
-            updateMethods();
-        }
-    }
-
-    @Override
-    public void unregister(Object listener) {
-        if (listeners.remove(listener)) {
-            updateMethods();
-        }
-    }
-
-    @Override
     public List<Object> getRegisteredListeners() {
-        return Collections.unmodifiableList(new LinkedList<>(listeners));
+        return Collections.unmodifiableList(new LinkedList<>(this.listeners));
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void handle(Event event) {
+    public void handle(final Event event) {
         Class<? extends Event> eventClass = event.getClass();
 
         do {
-            Map<Object, List<Method>> listeners = methods.get(eventClass);
+            final Map<Object, List<Method>> listeners = this.methods.get(eventClass);
 
             if (listeners != null) {
                 listeners.entrySet().forEach(e -> e.getValue().forEach(method -> {
                     try {
                         method.setAccessible(true);
                         method.invoke(e.getKey(), event);
-                    } catch (IllegalAccessException e1) {
+                    } catch (final IllegalAccessException e1) {
                         Hilda.getLogger().log(Level.WARNING, "Encountered a reflection exception while handling event", e1);
-                    } catch (Throwable throwable) {
+                    } catch (final Throwable throwable) {
                         Hilda.getLogger().log(Level.WARNING, "An event listener encountered an exception", throwable);
 
                         if (!(event instanceof UnhandledEventExceptionEvent)) {
@@ -106,34 +92,48 @@ public class AnnotatedEventManager implements IEventManager {
         } while (eventClass != null);
     }
 
+    @Override
+    public void register(final Object listener) {
+        if (this.listeners.add(listener)) {
+            this.updateMethods();
+        }
+    }
+
+    @Override
+    public void unregister(final Object listener) {
+        if (this.listeners.remove(listener)) {
+            this.updateMethods();
+        }
+    }
+
     @SuppressWarnings("rawtypes")
     private void updateMethods() {
-        methods.clear();
-        for (Object listener : listeners) {
-            boolean isClass = listener instanceof Class;
-            Class<?> c = isClass ? (Class) listener : listener.getClass();
-            Method[] allMethods = c.getDeclaredMethods();
+        this.methods.clear();
+        for (final Object listener : this.listeners) {
+            final boolean isClass = listener instanceof Class;
+            final Class<?> c = isClass ? (Class) listener : listener.getClass();
+            final Method[] allMethods = c.getDeclaredMethods();
 
-            for (Method m : allMethods) {
-                if (!m.isAnnotationPresent(EventHandler.class) || (isClass && !Modifier.isStatic(m.getModifiers()))) {
+            for (final Method m : allMethods) {
+                if (!m.isAnnotationPresent(EventHandler.class) || isClass && !Modifier.isStatic(m.getModifiers())) {
                     continue;
                 }
 
-                Class<?>[] pType = m.getParameterTypes();
+                final Class<?>[] pType = m.getParameterTypes();
 
                 if (pType.length == 1 && Event.class.isAssignableFrom(pType[0])) {
                     @SuppressWarnings("unchecked")
-                    Class<? extends Event> eventClass = (Class<? extends Event>) pType[0];
+                    final Class<? extends Event> eventClass = (Class<? extends Event>) pType[0];
 
-                    if (!methods.containsKey(eventClass)) {
-                        methods.put(eventClass, new HashMap<>());
+                    if (!this.methods.containsKey(eventClass)) {
+                        this.methods.put(eventClass, new HashMap<>());
                     }
 
-                    if (!methods.get(eventClass).containsKey(listener)) {
-                        methods.get(eventClass).put(listener, new ArrayList<>());
+                    if (!this.methods.get(eventClass).containsKey(listener)) {
+                        this.methods.get(eventClass).put(listener, new ArrayList<>());
                     }
 
-                    methods.get(eventClass).get(listener).add(m);
+                    this.methods.get(eventClass).get(listener).add(m);
                 }
             }
         }

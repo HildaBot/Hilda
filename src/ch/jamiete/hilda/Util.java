@@ -32,14 +32,6 @@ import net.dv8tion.jda.core.entities.User;
 public class Util {
     private static Hilda HILDA = null;
 
-    protected static void setHilda(Hilda hilda) {
-        Util.HILDA = hilda;
-    }
-
-    public static String sanitise(final String input) {
-        return input.replace("@everyone", "\\@\u200Beveryone").replace("@here", "\\@\u200Bhere");
-    }
-
     /**
      * Turns a String[] into a single String separated by the passed separator.
      * @param startIndex The index to start combining from.
@@ -63,10 +55,56 @@ public class Util {
         return builder.toString();
     }
 
-    public static Consumer<Message> deleteAfter(int seconds) {
+    public static Consumer<Message> deleteAfter(final int seconds) {
         return (message) -> {
-            HILDA.getExecutor().schedule(new MessageDeletionTask(message), seconds, TimeUnit.SECONDS);
+            Util.HILDA.getExecutor().schedule(new MessageDeletionTask(message), seconds, TimeUnit.SECONDS);
         };
+    }
+
+    /**
+     * Gets a user-friendly String of the strings passed.
+     * @param users The strings to list.
+     * @return The list of strings. For example, "Apple, Banana and Carrot".
+     */
+    public static String getAsList(final List<String> strings) {
+        final StringBuilder sb = new StringBuilder();
+
+        if (strings.size() == 0) {
+            return "";
+        }
+
+        if (strings.size() == 1) {
+            sb.append(strings.get(0));
+        } else {
+            for (final String string : strings.subList(0, strings.size() - 1)) {
+                sb.append(string).append(", ");
+            }
+
+            sb.setLength(sb.length() - 2);
+            sb.append(" and ").append(strings.get(strings.size() - 1));
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Gets a user-friendly String of the strings passed.
+     * @param users The strings to list.
+     * @return The list of strings. For example, "Apple, Banana and Carrot".
+     */
+    public static String getAsList(final String... strings) {
+        return Util.getAsList(Arrays.asList(strings));
+    }
+
+    /**
+     * Gets a user-friendly String of the channels passed.
+     * @param users The channels to list.
+     * @return The list of channels. For example, "#general, #voice and #bots".
+     */
+    public static String getChannelsAsString(final List<? extends Channel> channels) {
+        final List<String> strings = new ArrayList<String>();
+        channels.forEach(c -> strings.add("#" + c.getName()));
+        return Util.getAsList(strings);
     }
 
     /**
@@ -85,7 +123,7 @@ public class Util {
             months = 0;
         }
 
-        long years = months / 12;
+        final long years = months / 12;
         if (years > 0) {
             duration -= TimeUnit.DAYS.toMillis(years * 365);
         }
@@ -132,6 +170,17 @@ public class Util {
         }
 
         return sb.toString().trim();
+    }
+
+    /**
+     * Gets a user-friendly String of the members passed. The members will be mentioned.
+     * @param users The members to list.
+     * @return The list of members. For example, "{@literal @Jane, @Bob and @Suzie}".
+     */
+    public static String getMembersAsString(final List<Member> members) {
+        final List<User> users = new ArrayList<User>();
+        members.forEach(m -> users.add(m.getUser()));
+        return Util.getUsersAsString(users);
     }
 
     /**
@@ -183,38 +232,14 @@ public class Util {
     }
 
     /**
-     * Gets a user-friendly String of the strings passed.
-     * @param users The strings to list.
-     * @return The list of strings. For example, "Apple, Banana and Carrot".
+     * Gets a user-friendly String of the roles passed. The roles will not be mentioned.
+     * @param users The roles to list.
+     * @return The list of roles. For example, "Administrator, Moderator and Member".
      */
-    public static String getAsList(final String... strings) {
-        return Util.getAsList(Arrays.asList(strings));
-    }
-
-    /**
-     * Gets a user-friendly String of the strings passed.
-     * @param users The strings to list.
-     * @return The list of strings. For example, "Apple, Banana and Carrot".
-     */
-    public static String getAsList(final List<String> strings) {
-        StringBuilder sb = new StringBuilder();
-
-        if (strings.size() == 0) {
-            return "";
-        }
-
-        if (strings.size() == 1) {
-            sb.append(strings.get(0));
-        } else {
-            for (String string : strings.subList(0, strings.size() - 1)) {
-                sb.append(string).append(", ");
-            }
-
-            sb.setLength(sb.length() - 2);
-            sb.append(" and ").append(strings.get(strings.size() - 1));
-        }
-
-        return sb.toString();
+    public static String getRolesAsString(final List<Role> roles) {
+        final List<String> strings = new ArrayList<String>();
+        roles.forEach(r -> strings.add(r.getName()));
+        return Util.getAsList(strings);
     }
 
     /**
@@ -223,42 +248,17 @@ public class Util {
      * @return The list of users. For example, "{@literal @Jane, @Bob and @Suzie}".
      */
     public static String getUsersAsString(final List<User> users) {
-        List<String> strings = new ArrayList<String>();
+        final List<String> strings = new ArrayList<String>();
         users.forEach(u -> strings.add(u.getAsMention()));
         return Util.getAsList(strings);
     }
 
-    /**
-     * Gets a user-friendly String of the members passed. The members will be mentioned.
-     * @param users The members to list.
-     * @return The list of members. For example, "{@literal @Jane, @Bob and @Suzie}".
-     */
-    public static String getMembersAsString(final List<Member> members) {
-        List<User> users = new ArrayList<User>();
-        members.forEach(m -> users.add(m.getUser()));
-        return Util.getUsersAsString(users);
+    public static String sanitise(final String input) {
+        return input.replace("@everyone", "\\@\u200Beveryone").replace("@here", "\\@\u200Bhere");
     }
 
-    /**
-     * Gets a user-friendly String of the channels passed.
-     * @param users The channels to list.
-     * @return The list of channels. For example, "#general, #voice and #bots".
-     */
-    public static String getChannelsAsString(final List<? extends Channel> channels) {
-        List<String> strings = new ArrayList<String>();
-        channels.forEach(c -> strings.add("#" + c.getName()));
-        return Util.getAsList(strings);
-    }
-
-    /**
-     * Gets a user-friendly String of the roles passed. The roles will not be mentioned.
-     * @param users The roles to list.
-     * @return The list of roles. For example, "Administrator, Moderator and Member".
-     */
-    public static String getRolesAsString(final List<Role> roles) {
-        List<String> strings = new ArrayList<String>();
-        roles.forEach(r -> strings.add(r.getName()));
-        return Util.getAsList(strings);
+    protected static void setHilda(final Hilda hilda) {
+        Util.HILDA = hilda;
     }
 
 }

@@ -30,28 +30,28 @@ public class PluginData {
     // internal fields
     protected File pluginFile;
 
-    public File getPluginFile() {
-        return pluginFile;
-    }
-
     public String getAuthor() {
         return this.author;
+    }
+
+    public String[] getDependencies() {
+        return this.dependencies;
+    }
+
+    public String[] getLoadAfter() {
+        return this.load_after;
     }
 
     public String getName() {
         return this.name;
     }
 
+    public File getPluginFile() {
+        return this.pluginFile;
+    }
+
     public String getVersion() {
         return this.version;
-    }
-
-    public String[] getDependencies() {
-        return dependencies;
-    }
-
-    public String[] getLoadAfter() {
-        return this.load_after;
     }
 
 }
