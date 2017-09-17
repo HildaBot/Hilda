@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import javax.security.auth.login.LoginException;
 import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
+import net.dv8tion.jda.core.utils.SimpleLog;
 
 public class Start {
     /**
@@ -98,6 +99,7 @@ public class Start {
         try {
             this.hilda = new Hilda(apikey);
             this.hilda.start();
+            SimpleLog.addListener(new JDALogger());
         } catch (final IllegalArgumentException e) {
             Hilda.getLogger().log(Level.WARNING, "Encountered an exception while starting Hilda", e);
             System.exit(1);
