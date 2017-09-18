@@ -17,6 +17,7 @@
   *******************************************************************************/
 package ch.jamiete.hilda.events;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -79,7 +80,11 @@ public class AnnotatedEventManager implements IEventManager {
                     } catch (final IllegalAccessException e1) {
                         Hilda.getLogger().log(Level.WARNING, "Encountered a reflection exception while handling event", e1);
                     } catch (final Throwable throwable) {
-                        Hilda.getLogger().log(Level.WARNING, "An event listener encountered an exception", throwable);
+                        if (throwable instanceof InvocationTargetException && throwable.getCause() != null) {
+                            Hilda.getLogger().log(Level.WARNING, "An event listener encountered an exception", throwable.getCause());
+                        } else {
+                            Hilda.getLogger().log(Level.WARNING, "An event listener encountered an exception", throwable);
+                        }
 
                         if (!(event instanceof UnhandledEventExceptionEvent)) {
                             this.handle(new UnhandledEventExceptionEvent(event.getJDA(), 0L, throwable, event));
