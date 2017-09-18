@@ -33,6 +33,7 @@ public class CommandManager {
     public static final String PREFIX = "!";
     private final List<ChannelCommand> channelcommands;
     private final List<String> ignoredchannels, ignoredusers;
+    private int executions = 0;
     private boolean stopping = false;
     private final Hilda hilda;
 
@@ -152,6 +153,8 @@ public class CommandManager {
 
                     final ChannelCommand command = this.getChannelCommand(label);
 
+                    this.executions++;
+
                     if (this.ignoredchannels.contains(event.getChannel().getId()) && !command.shouldTranscend(event.getMessage())) {
                         Hilda.getLogger().fine("Ignoring message due to ignore override");
                         return;
@@ -199,6 +202,10 @@ public class CommandManager {
 
         this.channelcommands.add(command);
         Hilda.getLogger().info("Registered channel command " + command.getName() + (command.getAliases() != null ? " (" + Util.combineSplit(0, command.getAliases().toArray(new String[command.getAliases().size()]), ", ").trim() + ")" : ""));
+    }
+
+    public int getExecutions() {
+        return this.executions;
     }
 
     public void removeIgnoredChannel(final String id) {
