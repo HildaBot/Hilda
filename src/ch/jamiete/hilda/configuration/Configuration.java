@@ -138,4 +138,14 @@ public class Configuration {
         }
     }
 
+    public void setBoolean(final String name, final boolean value) {
+        this.json.addProperty(name, value);
+        this.save();
+    }
+
+    public void setString(final String name, final String value) {
+        this.json.addProperty(name, value);
+        this.save();
+    }
+
 }
