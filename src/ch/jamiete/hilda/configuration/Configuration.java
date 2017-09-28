@@ -116,6 +116,10 @@ public class Configuration {
         }
     }
 
+    public void reset() {
+        this.json = new JsonObject();
+    }
+
     public void save() {
         Charset charset = null;
 
