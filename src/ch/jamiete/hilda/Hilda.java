@@ -133,6 +133,41 @@ public class Hilda {
         return this.bot.getSelfUser().getName();
     }
 
+    /**
+     * Calls all necessary methods for a graceful shutdown. <p>
+     * <b>You will still need to exit the system with the correct system exit code.</b>
+     */
+    public void shutdown() {
+        Hilda.getLogger().info("Shutting down...");
+
+        this.bot.getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
+        this.commander.shutdown();
+
+        Hilda.getLogger().info("Shutting down plugins...");
+        this.plugins.disablePlugins();
+        Hilda.getLogger().info("Plugins shut down!");
+
+        Hilda.getLogger().info("Saving configurations...");
+        this.configs.save();
+        Hilda.getLogger().info("Configurations saved!");
+
+        Hilda.getLogger().info("Shutting down executor...");
+        this.executor.shutdown();
+        try {
+            this.executor.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            Hilda.getLogger().log(Level.WARNING, "Encountered an exception whilst terminating executor", e);
+        }
+        Hilda.getLogger().info("Executor completed " + this.executor.getCompletedTaskCount() + " with largest pool of " + this.executor.getLargestPoolSize());
+        Hilda.getLogger().info("Executor shut down!");
+
+        Hilda.getLogger().info("Disconnecting from Discord...");
+        this.bot.shutdown();
+        Hilda.getLogger().info("Disconnected!");
+
+        Hilda.getLogger().info("Goodbye!");
+    }
+
     public void start() {
         this.bot.setAutoReconnect(true);
         Hilda.getLogger().info("Connected to server!");

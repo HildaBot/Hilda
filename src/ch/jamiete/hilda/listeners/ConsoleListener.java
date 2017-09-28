@@ -18,10 +18,8 @@ package ch.jamiete.hilda.listeners;
 import java.util.Scanner;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Util;
-import net.dv8tion.jda.core.OnlineStatus;
 
 public class ConsoleListener extends Thread {
     private final Hilda hilda;
@@ -42,34 +40,7 @@ public class ConsoleListener extends Thread {
                 case "end":
                 case "quit":
                     scanner.close();
-                    Hilda.getLogger().info("Shutting down...");
-
-                    this.hilda.getBot().getPresence().setStatus(OnlineStatus.DO_NOT_DISTURB);
-                    this.hilda.getCommandManager().shutdown();
-
-                    Hilda.getLogger().info("Shutting down plugins...");
-                    this.hilda.getPluginManager().disablePlugins();
-                    Hilda.getLogger().info("Plugins shut down!");
-
-                    Hilda.getLogger().info("Saving configurations...");
-                    this.hilda.getConfigurationManager().save();
-                    Hilda.getLogger().info("Configurations saved!");
-
-                    Hilda.getLogger().info("Shutting down executor...");
-                    this.hilda.getExecutor().shutdown();
-                    try {
-                        this.hilda.getExecutor().awaitTermination(30, TimeUnit.SECONDS);
-                    } catch (final InterruptedException e) {
-                        Hilda.getLogger().log(Level.WARNING, "Encountered an exception whilst terminating executor", e);
-                    }
-                    Hilda.getLogger().info("Executor completed " + this.hilda.getExecutor().getCompletedTaskCount() + " with largest pool of " + this.hilda.getExecutor().getLargestPoolSize());
-                    Hilda.getLogger().info("Executor shut down!");
-
-                    Hilda.getLogger().info("Disconnecting from Discord...");
-                    this.hilda.getBot().shutdown();
-                    Hilda.getLogger().info("Disconnected!");
-
-                    Hilda.getLogger().info("Goodbye!");
+                    this.hilda.shutdown();
                     System.exit(0);
                     break;
 
