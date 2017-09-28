@@ -100,6 +100,10 @@ public class CommandManager {
         return Collections.unmodifiableList(this.channelcommands);
     }
 
+    public int getExecutions() {
+        return this.executions;
+    }
+
     public List<String> getIgnoredChannels() {
         return Collections.unmodifiableList(this.ignoredchannels);
     }
@@ -202,10 +206,6 @@ public class CommandManager {
 
         this.channelcommands.add(command);
         Hilda.getLogger().info("Registered channel command " + command.getName() + (command.getAliases() != null ? " (" + Util.combineSplit(0, command.getAliases().toArray(new String[command.getAliases().size()]), ", ").trim() + ")" : ""));
-    }
-
-    public int getExecutions() {
-        return this.executions;
     }
 
     public void removeIgnoredChannel(final String id) {

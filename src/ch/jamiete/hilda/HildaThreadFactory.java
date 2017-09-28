@@ -12,20 +12,22 @@ public class HildaThreadFactory implements ThreadFactory {
     private final String prefix;
 
     public HildaThreadFactory() {
-        SecurityManager manager = System.getSecurityManager();
-        group = (manager != null) ? manager.getThreadGroup() : Thread.currentThread().getThreadGroup();
-        prefix = "HildaPool(" + poolNumber.getAndIncrement() + ")-thread-";
+        final SecurityManager manager = System.getSecurityManager();
+        this.group = manager != null ? manager.getThreadGroup() : Thread.currentThread().getThreadGroup();
+        this.prefix = "HildaPool(" + HildaThreadFactory.poolNumber.getAndIncrement() + ")-thread-";
     }
 
     @Override
-    public Thread newThread(Runnable runnable) {
-        Thread thread = new Thread(group, runnable, prefix + threadNumber.getAndIncrement(), 0);
+    public Thread newThread(final Runnable runnable) {
+        final Thread thread = new Thread(this.group, runnable, this.prefix + this.threadNumber.getAndIncrement(), 0);
 
-        if (thread.isDaemon())
+        if (thread.isDaemon()) {
             thread.setDaemon(false);
+        }
 
-        if (thread.getPriority() != Thread.NORM_PRIORITY)
+        if (thread.getPriority() != Thread.NORM_PRIORITY) {
             thread.setPriority(Thread.NORM_PRIORITY);
+        }
 
         thread.setUncaughtExceptionHandler(HildaThreadFactory.listener);
 
