@@ -15,6 +15,7 @@
  *******************************************************************************/
 package ch.jamiete.hilda.commands;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import ch.jamiete.hilda.Hilda;
@@ -25,7 +26,7 @@ public abstract class GenericCommand implements Command {
 
     private String name;
 
-    private List<String> aliases;
+    List<String> aliases;
     private String description;
     private Permission minimumPermission;
 
@@ -38,7 +39,7 @@ public abstract class GenericCommand implements Command {
 
     @Override
     public List<String> getAliases() {
-        return this.aliases;
+        return Collections.unmodifiableList(this.aliases);
     }
 
     @Override
@@ -85,7 +86,7 @@ public abstract class GenericCommand implements Command {
 
     /**
      * {@inheritDoc}
-     * The aliases will be saved in an unmodifiable list. If there are no aliases to be recognised by this channel do not invoke this method.
+     * The aliases will be saved as a copy of the provided list. If there are no aliases to be recognised by this channel do not invoke this method.
      * <b>Aliases cannot be set again after they haves been set. As such, aliases should be set by the constructor.</b>
      * @throws RuntimeException If the aliases have already been set.
      */
@@ -95,7 +96,11 @@ public abstract class GenericCommand implements Command {
             throw new RuntimeException("Command already has aliases specified.");
         }
 
-        this.aliases = Collections.unmodifiableList(aliases);
+        // Create a new list to ensure it is modifiable
+        List<String> temp = new ArrayList<>(aliases.size());
+        aliases.forEach(a -> temp.add(a.toLowerCase()));
+
+        this.aliases = temp;
     }
 
     @Override
