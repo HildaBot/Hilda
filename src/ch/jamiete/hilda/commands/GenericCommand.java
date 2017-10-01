@@ -75,13 +75,7 @@ public abstract class GenericCommand implements Command {
             return false;
         }
 
-        for (final String alias : this.aliases) {
-            if (alias.equalsIgnoreCase(test)) {
-                return true;
-            }
-        }
-
-        return false;
+        return this.aliases.stream().anyMatch(a -> a.equalsIgnoreCase(test));
     }
 
     /**
