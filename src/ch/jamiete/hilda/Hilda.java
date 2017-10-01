@@ -19,6 +19,7 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.security.auth.login.LoginException;
 import ch.jamiete.hilda.commands.CommandManager;
