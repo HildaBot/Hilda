@@ -88,37 +88,6 @@ public class Hilda {
     }
 
     /**
-     * Helper method <br>
-     * Gets the milliseconds of the nearest hour in timezone.
-     * @param timezone The timezone to check.
-     * @return The next hour in timezone.
-     */
-    public long getNextHour(final String timezone) {
-        final Calendar time = Calendar.getInstance(TimeZone.getTimeZone(timezone));
-        time.set(Calendar.MINUTE, 0);
-        time.set(Calendar.SECOND, 0);
-        time.set(Calendar.MILLISECOND, 0);
-        time.add(Calendar.HOUR, 1);
-        return time.getTimeInMillis();
-    }
-
-    /**
-     * Helper method <br>
-     * Gets the milliseconds of the next midnight in timezone.
-     * @param timezone The timezone to check.
-     * @return The next midnight in timezone.
-     */
-    public long getNextMidnightInMillis(final String timezone) {
-        final Calendar time = Calendar.getInstance(TimeZone.getTimeZone(timezone));
-        time.set(Calendar.HOUR_OF_DAY, 0);
-        time.set(Calendar.MINUTE, 0);
-        time.set(Calendar.SECOND, 0);
-        time.set(Calendar.MILLISECOND, 0);
-        time.add(Calendar.DAY_OF_MONTH, 1);
-        return time.getTimeInMillis();
-    }
-
-    /**
      * @return The {@link PluginManager} instance
      */
     public PluginManager getPluginManager() {
@@ -178,7 +147,7 @@ public class Hilda {
         this.executor.setRemoveOnCancelPolicy(true);
         this.executor.setMaximumPoolSize(10);
 
-        final long rotate = this.getNextMidnightInMillis("GMT+10") - System.currentTimeMillis();
+        final long rotate = Util.getNextMidnightInMillis("GMT+10") - System.currentTimeMillis();
         this.executor.scheduleAtFixedRate(new LogRotateTask(), rotate, 86400000, TimeUnit.MILLISECONDS); // At midnight then every 24 hours
         Hilda.getLogger().info("Rotating log files in " + Util.getFriendlyTime(rotate));
 
