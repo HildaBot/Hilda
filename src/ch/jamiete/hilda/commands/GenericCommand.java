@@ -27,9 +27,9 @@ public abstract class GenericCommand implements Command {
 
     private List<String> aliases;
     private String description;
-    private Permission minimum_permission;
+    private Permission minimumPermission;
 
-    protected boolean aliases_final = false;
+    boolean aliasesFinal = false;
     private boolean hide = false;
 
     protected GenericCommand(final Hilda hilda) {
@@ -56,7 +56,7 @@ public abstract class GenericCommand implements Command {
 
     @Override
     public Permission getMinimumPermission() {
-        return this.minimum_permission;
+        return this.minimumPermission;
     }
 
     @Override
@@ -91,7 +91,7 @@ public abstract class GenericCommand implements Command {
      */
     @Override
     public void setAliases(final List<String> aliases) {
-        if (this.aliases_final) {
+        if (this.aliasesFinal) {
             throw new RuntimeException("Command already has aliases specified.");
         }
 
@@ -113,7 +113,7 @@ public abstract class GenericCommand implements Command {
 
     @Override
     public void setMinimumPermission(final Permission minimum_permission) {
-        this.minimum_permission = minimum_permission;
+        this.minimumPermission = minimum_permission;
     }
 
     /**
