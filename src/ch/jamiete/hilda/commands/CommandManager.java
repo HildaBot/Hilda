@@ -110,6 +110,15 @@ public class CommandManager {
         return this.getChannelCommand(label) != null;
     }
 
+    /**
+     * Checks whether a command has the label registered as an alias. Case insensitive.
+     * @param label The label to test for.
+     * @return Whether a command has the label registered as an alias.
+     */
+    public boolean isChannelCommandAlias(final String label) {
+        return this.channelCommands.stream().anyMatch(c -> c.hasAlias(label));
+    }
+
     public boolean isChannelIgnored(final String id) {
         return this.ignoredChannels.contains(id);
     }
