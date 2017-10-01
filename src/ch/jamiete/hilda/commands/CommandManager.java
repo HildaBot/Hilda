@@ -197,9 +197,15 @@ public class CommandManager {
         Sanity.falsiness(this.channelCommands.contains(command), "Cannot register duplicate command " + command.getName() + ".");
         Sanity.falsiness(this.isChannelCommand(command.getName()) && !this.isChannelCommandAlias(command.getName()), "Command name " + command.getName() + " is already registered.");
 
+        if (this.isChannelCommand(command.getName()) && this.isChannelCommandAlias(command.getName())) {
+            ChannelCommand temp = this.getChannelCommand(command.getName());
+            temp.aliases.remove(command.getName().toLowerCase());
+            Hilda.getLogger().info("The alias " + command.getName() + " was removed from the command " + command.getName() + " to make way for another command.");
+        }
+
         if (command.getAliases() != null) {
             command.setAliases(this.cleanChannelAliases(command.getAliases()));
-            command.aliases_final = true;
+            command.aliasesFinal = true;
         }
 
         this.channelCommands.add(command);
