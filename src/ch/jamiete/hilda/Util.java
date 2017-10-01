@@ -56,14 +56,14 @@ public class Util {
     }
 
     public static Consumer<Message> deleteAfter(final int seconds) {
-        return (message) -> {
+        return message -> {
             Util.HILDA.getExecutor().schedule(new MessageDeletionTask(message), seconds, TimeUnit.SECONDS);
         };
     }
 
     /**
      * Gets a user-friendly String of the strings passed.
-     * @param users The strings to list.
+     * @param strings The strings to list.
      * @return The list of strings. For example, "Apple, Banana and Carrot".
      */
     public static String getAsList(final List<String> strings) {
@@ -89,7 +89,7 @@ public class Util {
 
     /**
      * Gets a user-friendly String of the strings passed.
-     * @param users The strings to list.
+     * @param strings The strings to list.
      * @return The list of strings. For example, "Apple, Banana and Carrot".
      */
     public static String getAsList(final String... strings) {
@@ -98,11 +98,11 @@ public class Util {
 
     /**
      * Gets a user-friendly String of the channels passed.
-     * @param users The channels to list.
+     * @param channels The channels to list.
      * @return The list of channels. For example, "#general, #voice and #bots".
      */
     public static String getChannelsAsString(final List<? extends Channel> channels) {
-        final List<String> strings = new ArrayList<String>();
+        final List<String> strings = new ArrayList<>();
         channels.forEach(c -> strings.add("#" + c.getName()));
         return Util.getAsList(strings);
     }
@@ -174,11 +174,11 @@ public class Util {
 
     /**
      * Gets a user-friendly String of the members passed. The members will be mentioned.
-     * @param users The members to list.
+     * @param members The members to list.
      * @return The list of members. For example, "{@literal @Jane, @Bob and @Suzie}".
      */
     public static String getMembersAsString(final List<Member> members) {
-        final List<User> users = new ArrayList<User>();
+        final List<User> users = new ArrayList<>();
         members.forEach(m -> users.add(m.getUser()));
         return Util.getUsersAsString(users);
     }
@@ -186,7 +186,7 @@ public class Util {
     /**
      * Gets the name of the Member in a format that is amenable to use in logs or administrator-facing contexts. <br>
      * Wraps {@link #getName(User)} to avoid long lines of code.
-     * @param user The user whose name should be given
+     * @param member The user whose name should be given
      * @return The user's underlying username and their discriminator (e.g. BobDoe#1234)
      */
     public static String getName(final Member member) {
@@ -233,11 +233,11 @@ public class Util {
 
     /**
      * Gets a user-friendly String of the roles passed. The roles will not be mentioned.
-     * @param users The roles to list.
+     * @param roles The roles to list.
      * @return The list of roles. For example, "Administrator, Moderator and Member".
      */
     public static String getRolesAsString(final List<Role> roles) {
-        final List<String> strings = new ArrayList<String>();
+        final List<String> strings = new ArrayList<>();
         roles.forEach(r -> strings.add(r.getName()));
         return Util.getAsList(strings);
     }
@@ -248,7 +248,7 @@ public class Util {
      * @return The list of users. For example, "{@literal @Jane, @Bob and @Suzie}".
      */
     public static String getUsersAsString(final List<User> users) {
-        final List<String> strings = new ArrayList<String>();
+        final List<String> strings = new ArrayList<>();
         users.forEach(u -> strings.add(u.getAsMention()));
         return Util.getAsList(strings);
     }
