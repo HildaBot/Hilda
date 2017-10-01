@@ -66,15 +66,10 @@ public class CommandManager {
     public List<String> cleanChannelAliases(final List<String> aliases) {
         Sanity.nullCheck(aliases, "Cannot supply null object.");
 
-        final List<String> clean = new ArrayList<String>();
+        List<String> temp = new ArrayList<>();
+        aliases.stream().filter(a -> !this.isChannelCommand(a)).forEach(temp::add);
 
-        for (final String alias : aliases) {
-            if (!this.isChannelCommand(alias)) {
-                clean.add(alias);
-            }
-        }
-
-        return clean;
+        return temp;
     }
 
     /**
@@ -83,13 +78,7 @@ public class CommandManager {
      * @return The {@link ChannelCommand} that responds to the label or {@code null} if no command responds to that label.
      */
     public ChannelCommand getChannelCommand(final String label) {
-        for (final ChannelCommand command : this.channelcommands) {
-            if (command.getName().equalsIgnoreCase(label) || command.hasAlias(label)) {
-                return command;
-            }
-        }
-
-        return null;
+        return this.channelCommands.stream().filter(c -> c.getName().equalsIgnoreCase(label) || c.hasAlias(label)).findFirst().orElse(null);
     }
 
     /**
