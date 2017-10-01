@@ -33,17 +33,17 @@ public abstract class GenericCommand implements Command {
     boolean aliasesFinal = false;
     private boolean hide = false;
 
-    protected GenericCommand(final Hilda hilda) {
+    GenericCommand(final Hilda hilda) {
         this.hilda = hilda;
     }
 
     @Override
-    public List<String> getAliases() {
+    public final List<String> getAliases() {
         return Collections.unmodifiableList(this.aliases);
     }
 
     @Override
-    public String getDescription() {
+    public final String getDescription() {
         return this.description;
     }
 
@@ -51,26 +51,26 @@ public abstract class GenericCommand implements Command {
      * Gets whether the command should be hidden from the help command.
      * @return Whether the command should be hidden from the help command.
      */
-    public boolean getHide() {
+    public final boolean getHide() {
         return this.hide;
     }
 
     @Override
-    public Permission getMinimumPermission() {
+    public final Permission getMinimumPermission() {
         return this.minimumPermission;
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return this.name;
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDoc} <p>
      * Case insensitive.
      */
     @Override
-    public boolean hasAlias(final String test) {
+    public final boolean hasAlias(final String test) {
         if (this.aliases == null) {
             return false;
         }
@@ -91,7 +91,7 @@ public abstract class GenericCommand implements Command {
      * @throws RuntimeException If the aliases have already been set.
      */
     @Override
-    public void setAliases(final List<String> aliases) {
+    public final void setAliases(final List<String> aliases) {
         if (this.aliasesFinal) {
             throw new RuntimeException("Command already has aliases specified.");
         }
@@ -104,7 +104,7 @@ public abstract class GenericCommand implements Command {
     }
 
     @Override
-    public void setDescription(final String description) {
+    public final void setDescription(final String description) {
         this.description = description;
     }
 
@@ -112,12 +112,12 @@ public abstract class GenericCommand implements Command {
      * Sets whether the command should be hidden from the help command.
      * @param hide Whether the command should be hidden from the help command.
      */
-    public void setHide(final boolean hide) {
+    public final void setHide(final boolean hide) {
         this.hide = hide;
     }
 
     @Override
-    public void setMinimumPermission(final Permission minimum_permission) {
+    public final void setMinimumPermission(final Permission minimum_permission) {
         this.minimumPermission = minimum_permission;
     }
 
@@ -127,7 +127,7 @@ public abstract class GenericCommand implements Command {
      * @throws RuntimeException If the name has already been set.
      */
     @Override
-    public void setName(final String name) {
+    public final void setName(final String name) {
         if (this.name != null) {
             throw new RuntimeException("Command already named.");
         }
