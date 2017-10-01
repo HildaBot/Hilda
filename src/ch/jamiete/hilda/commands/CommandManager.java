@@ -31,8 +31,8 @@ public class CommandManager {
      * The command prefix that the bot will respond to.
      */
     public static final String PREFIX = "!";
-    private final List<ChannelCommand> channelcommands;
-    private final List<String> ignoredchannels, ignoredusers;
+    private final List<ChannelCommand> channelCommands;
+    private final List<String> ignoredChannels, ignoredUsers;
     private int executions = 0;
     private boolean stopping = false;
     private final Hilda hilda;
@@ -40,20 +40,20 @@ public class CommandManager {
     public CommandManager(final Hilda hilda) {
         this.hilda = hilda;
 
-        this.channelcommands = new ArrayList<ChannelCommand>();
-        this.ignoredchannels = new ArrayList<String>();
-        this.ignoredusers = new ArrayList<String>();
+        this.channelCommands = new ArrayList<>();
+        this.ignoredChannels = new ArrayList<>();
+        this.ignoredUsers = new ArrayList<>();
     }
 
     public void addIgnoredChannel(final String id) {
-        if (!this.ignoredchannels.contains(id)) {
-            this.ignoredchannels.add(id);
+        if (!this.ignoredChannels.contains(id)) {
+            this.ignoredChannels.add(id);
         }
     }
 
     public void addIgnoredUser(final String id) {
-        if (!this.ignoredusers.contains(id)) {
-            this.ignoredusers.add(id);
+        if (!this.ignoredUsers.contains(id)) {
+            this.ignoredUsers.add(id);
         }
     }
 
@@ -97,7 +97,7 @@ public class CommandManager {
      * @return A {@link ChannelCommand} array containing all registered channel commands.
      */
     public List<ChannelCommand> getChannelCommands() {
-        return Collections.unmodifiableList(this.channelcommands);
+        return Collections.unmodifiableList(this.channelCommands);
     }
 
     public int getExecutions() {
@@ -105,11 +105,11 @@ public class CommandManager {
     }
 
     public List<String> getIgnoredChannels() {
-        return Collections.unmodifiableList(this.ignoredchannels);
+        return Collections.unmodifiableList(this.ignoredChannels);
     }
 
     public List<String> getIgnoredUsers() {
-        return Collections.unmodifiableList(this.ignoredusers);
+        return Collections.unmodifiableList(this.ignoredUsers);
     }
 
     /**
@@ -122,11 +122,11 @@ public class CommandManager {
     }
 
     public boolean isChannelIgnored(final String id) {
-        return this.ignoredchannels.contains(id);
+        return this.ignoredChannels.contains(id);
     }
 
     public boolean isUserIgnored(final String id) {
-        return this.ignoredchannels.contains(id);
+        return this.ignoredChannels.contains(id);
     }
 
     @EventHandler
@@ -135,7 +135,7 @@ public class CommandManager {
             return;
         }
 
-        if (this.ignoredusers.contains(event.getAuthor().getId())) {
+        if (this.ignoredUsers.contains(event.getAuthor().getId())) {
             return;
         }
 
@@ -159,7 +159,7 @@ public class CommandManager {
 
                     this.executions++;
 
-                    if (this.ignoredchannels.contains(event.getChannel().getId()) && !command.shouldTranscend(event.getMessage())) {
+                    if (this.ignoredChannels.contains(event.getChannel().getId()) && !command.shouldTranscend(event.getMessage())) {
                         Hilda.getLogger().fine("Ignoring message due to ignore override");
                         return;
                     }
@@ -204,16 +204,16 @@ public class CommandManager {
             command.aliases_final = true;
         }
 
-        this.channelcommands.add(command);
+        this.channelCommands.add(command);
         Hilda.getLogger().info("Registered channel command " + command.getName() + (command.getAliases() != null ? " (" + Util.combineSplit(0, command.getAliases().toArray(new String[command.getAliases().size()]), ", ").trim() + ")" : ""));
     }
 
     public void removeIgnoredChannel(final String id) {
-        this.ignoredchannels.remove(id);
+        this.ignoredChannels.remove(id);
     }
 
     public void removeIgnoredUser(final String id) {
-        this.ignoredusers.remove(id);
+        this.ignoredUsers.remove(id);
     }
 
     public void shutdown() {
