@@ -203,13 +203,13 @@ public class CommandManager {
             Hilda.getLogger().info("The alias " + command.getName() + " was removed from the command " + command.getName() + " to make way for another command.");
         }
 
-        if (command.getAliases() != null) {
+        if (command.getAliases() != null && !command.getAliases().isEmpty()) {
             command.setAliases(this.cleanChannelAliases(command.getAliases()));
             command.aliasesFinal = true;
         }
 
         this.channelCommands.add(command);
-        Hilda.getLogger().info("Registered channel command " + command.getName() + (command.getAliases() != null ? " (" + Util.combineSplit(0, command.getAliases().toArray(new String[command.getAliases().size()]), ", ").trim() + ")" : ""));
+        Hilda.getLogger().info("Registered channel command " + command.getName() + (!command.getAliases().isEmpty() ? " (" + Util.combineSplit(0, command.getAliases().toArray(new String[command.getAliases().size()]), ", ").trim() + ")" : ""));
     }
 
     public void removeIgnoredChannel(final String id) {

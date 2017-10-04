@@ -39,7 +39,7 @@ public abstract class GenericCommand implements Command {
 
     @Override
     public final List<String> getAliases() {
-        return Collections.unmodifiableList(this.aliases);
+        return aliases == null ? Collections.emptyList() : Collections.unmodifiableList(this.aliases);
     }
 
     @Override
