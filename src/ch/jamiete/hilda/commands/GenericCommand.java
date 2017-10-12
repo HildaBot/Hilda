@@ -15,11 +15,11 @@
  *******************************************************************************/
 package ch.jamiete.hilda.commands;
 
+import ch.jamiete.hilda.Hilda;
+import net.dv8tion.jda.core.Permission;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import ch.jamiete.hilda.Hilda;
-import net.dv8tion.jda.core.Permission;
 
 public abstract class GenericCommand implements Command {
     protected final Hilda hilda;

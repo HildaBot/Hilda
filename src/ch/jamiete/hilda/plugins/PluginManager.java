@@ -15,6 +15,10 @@
  *******************************************************************************/
 package ch.jamiete.hilda.plugins;
 
+import ch.jamiete.hilda.Hilda;
+import ch.jamiete.hilda.Sanity;
+import com.google.gson.Gson;
+import org.apache.commons.io.IOUtils;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -33,10 +37,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import org.apache.commons.io.IOUtils;
-import com.google.gson.Gson;
-import ch.jamiete.hilda.Hilda;
-import ch.jamiete.hilda.Sanity;
 
 public class PluginManager {
     private final List<HildaPlugin> plugins = Collections.synchronizedList(new ArrayList<HildaPlugin>());

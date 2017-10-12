@@ -15,17 +15,17 @@
  *******************************************************************************/
 package ch.jamiete.hilda.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import ch.jamiete.hilda.Hilda;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.MessageBuilder.Formatting;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.TextChannel;
+import org.apache.commons.lang3.StringUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class ChannelSeniorCommand extends ChannelCommand {
     private final List<ChannelSubCommand> subcommands = new ArrayList<ChannelSubCommand>();

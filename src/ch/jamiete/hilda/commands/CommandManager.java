@@ -15,16 +15,16 @@
  *******************************************************************************/
 package ch.jamiete.hilda.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
 import ch.jamiete.hilda.Util;
 import ch.jamiete.hilda.events.EventHandler;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Level;
 
 public class CommandManager {
     /**

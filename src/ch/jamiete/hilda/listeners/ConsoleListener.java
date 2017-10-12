@@ -15,11 +15,11 @@
  *******************************************************************************/
 package ch.jamiete.hilda.listeners;
 
+import ch.jamiete.hilda.Hilda;
+import ch.jamiete.hilda.Util;
 import java.util.Scanner;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import ch.jamiete.hilda.Hilda;
-import ch.jamiete.hilda.Util;
 
 public class ConsoleListener extends Thread {
     private final Hilda hilda;

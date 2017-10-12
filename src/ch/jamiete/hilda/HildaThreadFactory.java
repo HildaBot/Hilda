@@ -1,8 +1,8 @@
 package ch.jamiete.hilda;
 
+import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
 
 public class HildaThreadFactory implements ThreadFactory {
     private static final AtomicInteger poolNumber = new AtomicInteger(1);

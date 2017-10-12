@@ -15,8 +15,8 @@
  *******************************************************************************/
 package ch.jamiete.hilda.listeners;
 
-import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
+import java.util.logging.Level;
 
 public class UncaughtExceptionListener implements Thread.UncaughtExceptionHandler {
 

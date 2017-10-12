@@ -17,6 +17,9 @@
   *******************************************************************************/
 package ch.jamiete.hilda.events;
 
+import ch.jamiete.hilda.Hilda;
+import net.dv8tion.jda.core.events.Event;
+import net.dv8tion.jda.core.hooks.IEventManager;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -29,9 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
-import ch.jamiete.hilda.Hilda;
-import net.dv8tion.jda.core.events.Event;
-import net.dv8tion.jda.core.hooks.IEventManager;
 
 /**
  * Implementation for {@link net.dv8tion.jda.core.hooks.IEventManager IEventManager}
