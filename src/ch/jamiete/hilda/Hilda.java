@@ -148,7 +148,7 @@ public class Hilda {
 
         Hilda.getLogger().info("Registering managers...");
         this.commander = new CommandManager(this);
-        this.configs = new ConfigurationManager();
+        this.configs = new ConfigurationManager(this);
         this.plugins = new PluginManager(this);
         Hilda.getLogger().info("Managers registered!");
 
