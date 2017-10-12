@@ -15,17 +15,17 @@
  *******************************************************************************/
 package ch.jamiete.hilda.configuration;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.logging.Level;
-import org.apache.commons.io.FileUtils;
+import ch.jamiete.hilda.Hilda;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import ch.jamiete.hilda.Hilda;
+import org.apache.commons.io.FileUtils;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.logging.Level;
 
 /**
  * A representation of a configuration file loaded from disk. <p>
@@ -155,6 +155,47 @@ public class Configuration {
     public void setString(final String name, final String value) {
         this.json.addProperty(name, value);
         this.save();
+    }
+
+    public void setInteger(final String name, final String value) {
+        this.json.addProperty(name, value);
+        this.save();
+    }
+
+    public boolean hasString(final String name) {
+        String ret = null;
+
+        try {
+            ret = this.json.get(name).getAsString();
+        } catch (Exception e) {
+
+        }
+
+        return ret != null;
+    }
+
+    public boolean hasBoolean(final String name) {
+        Boolean ret = null;
+
+        try {
+            ret = this.json.get(name).getAsBoolean();
+        } catch (Exception e) {
+
+        }
+
+        return ret != null;
+    }
+
+    public boolean hasInteger(final String name) {
+        Integer ret = null;
+
+        try {
+            ret = this.json.get(name).getAsInt();
+        } catch (Exception e) {
+
+        }
+
+        return ret != null;
     }
 
 }
