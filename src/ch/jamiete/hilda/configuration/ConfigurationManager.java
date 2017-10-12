@@ -15,15 +15,24 @@
  *******************************************************************************/
 package ch.jamiete.hilda.configuration;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import ch.jamiete.hilda.Hilda;
+import ch.jamiete.hilda.Start;
 import ch.jamiete.hilda.plugins.HildaPlugin;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ConfigurationManager {
-    private final Map<String, Configuration> configs = Collections.synchronizedMap(new HashMap<String, Configuration>());
+    private static final int TIME_LIMIT = 5 * 60 * 1000;
+    private final List<ConfigurationWrapper> configs = Collections.synchronizedList(new ArrayList<>());
+
+    public ConfigurationManager(Hilda hilda) {
+        hilda.getExecutor().scheduleWithFixedDelay(() -> {
+            this.unload();
+        }, 10, 10, TimeUnit.MINUTES);
+    }
 
     public Configuration getConfiguration(final HildaPlugin plugin) {
         return this.getConfiguration(plugin, "config.json");
@@ -44,31 +53,43 @@ public class ConfigurationManager {
             id = id.replace('/', '-');
         }
 
-        Configuration config;
+        ConfigurationWrapper config;
+        final String tmpId = id;
 
         synchronized (this.configs) {
-            config = this.configs.get(id);
+            config = this.configs.stream().filter(wrapper -> wrapper.name.equals(tmpId)).findFirst().orElse(null);
         }
 
         if (config != null) {
-            return config;
+            config.access = System.currentTimeMillis();
+            return config.getConfiguration();
         }
 
-        config = new Configuration(new File("configs/" + id));
+        config = new ConfigurationWrapper(tmpId, new Configuration(new File("configs/" + id)));
 
         synchronized (this.configs) {
-            this.configs.put(id, config);
+            this.configs.add(config);
         }
 
-        config.load();
-        return config;
+        config.getConfiguration().load();
+        return config.getConfiguration();
     }
 
     public void save() {
         synchronized (this.configs) {
-            this.configs.forEach((s, c) -> c.save());
+            this.configs.forEach(wrapper -> wrapper.getConfiguration().save());
         }
 
         Hilda.getLogger().fine("Saved all " + this.configs.size() + " configuration files.");
+    }
+
+    public void unload() {
+        long now = System.currentTimeMillis();
+        int size = this.configs.size();
+        this.configs.removeIf(wrapper -> now - wrapper.access >= TIME_LIMIT);
+
+        if (Start.DEBUG && size > this.configs.size()) {
+            Hilda.getLogger().fine("Pruned " + (size - this.configs.size()) + " loaded configuration files.");
+        }
     }
 }

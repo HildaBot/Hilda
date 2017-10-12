@@ -27,6 +27,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import ch.jamiete.hilda.Hilda;
 
+/**
+ * A representation of a configuration file loaded from disk. <p>
+ * <b>Do not store references of a configuration file. Fetch it every time you need it.</b> <p>
+ * If you do store references of a configuration file, these may become stale over time as new instances of that configuration file are saved to and loaded from disk. As such, data loss becomes possible.
+ */
 public class Configuration {
     private final File file;
     private JsonObject json;
