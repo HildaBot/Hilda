@@ -15,6 +15,9 @@
  *******************************************************************************/
 package ch.jamiete.hilda;
 
+import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
+import net.dv8tion.jda.core.exceptions.RateLimitedException;
+import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -22,10 +25,7 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
-import javax.security.auth.login.LoginException;
-import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
-import net.dv8tion.jda.core.exceptions.RateLimitedException;
-import net.dv8tion.jda.core.utils.SimpleLog;
+import java.util.logging.Logger;
 
 public class Start {
     /**
@@ -49,24 +49,27 @@ public class Start {
         }
 
         final Start start = new Start();
+
+        // Initial global logging configuration
+        for (Handler handler : Logger.getLogger("").getHandlers()) {
+            if (handler instanceof ConsoleHandler) {
+                Logger.getLogger("").removeHandler(handler);
+            }
+        }
+
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(new LogFormat());
+        handler.setLevel(Start.DEBUG ? Level.FINE : Level.INFO);
+        Logger.getLogger("").addHandler(handler);
+
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionListener());
+
+        // Hilda startup
         Start.setupLogging();
         start.start(args[0]);
     }
 
     public static void setupLogging() {
-        Hilda.getLogger().setUseParentHandlers(false);
-
-        for (final Handler handler : Hilda.getLogger().getHandlers()) {
-            if (handler instanceof ConsoleHandler) {
-                Hilda.getLogger().removeHandler(handler);
-            }
-        }
-
-        final ConsoleHandler handler = new ConsoleHandler();
-        handler.setFormatter(new LogFormat());
-        Hilda.getLogger().addHandler(handler);
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionListener());
-
         try {
             final File file = new File("log");
 
@@ -82,7 +85,6 @@ public class Start {
         }
 
         if (Start.DEBUG) {
-            handler.setLevel(Level.FINE);
             Hilda.getLogger().setLevel(Level.FINE);
         }
     }
@@ -99,7 +101,6 @@ public class Start {
         try {
             this.hilda = new Hilda(apikey);
             this.hilda.start();
-            SimpleLog.addListener(new JDALogger());
         } catch (final IllegalArgumentException e) {
             Hilda.getLogger().log(Level.WARNING, "Encountered an exception while starting Hilda", e);
             System.exit(1);
