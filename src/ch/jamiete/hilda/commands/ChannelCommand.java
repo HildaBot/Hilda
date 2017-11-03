@@ -158,7 +158,7 @@ public abstract class ChannelCommand extends GenericCommand {
      * @param params The parameters that the command recognises and can respond to.
      */
     protected void usage(final Message received, final String params) {
-        if (this.getAliases() != null) {
+        if (!this.getAliases().isEmpty()) {
             Hilda.getLogger().warning(this.getName() + " has aliases but called #usage without providing the label called.");
         }
 
