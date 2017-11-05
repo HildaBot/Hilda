@@ -17,6 +17,7 @@ package ch.jamiete.hilda;
 
 import ch.jamiete.hilda.runnables.MessageDeletionTask;
 import net.dv8tion.jda.core.entities.Channel;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.Role;
@@ -200,6 +201,15 @@ public class Util {
      */
     public static String getName(final User user) {
         return user.getName() + "#" + user.getDiscriminator();
+    }
+
+    /**
+     * Gets the name of the Guild in a format that is amenable to use in logs or administrator-facing contexts.
+     * @param guild The guild whose name should be given
+     * @return The guild's underlying username and its id in parentheses (e.g. Example#23482348203984)
+     */
+    public static String getName(final Guild guild) {
+        return guild.getName() + " (" + guild.getId() + ")";
     }
 
     /**
