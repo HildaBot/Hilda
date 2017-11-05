@@ -18,7 +18,14 @@
 package ch.jamiete.hilda.events;
 
 import ch.jamiete.hilda.Hilda;
+import ch.jamiete.hilda.Util;
 import net.dv8tion.jda.core.events.Event;
+import net.dv8tion.jda.core.events.channel.text.GenericTextChannelEvent;
+import net.dv8tion.jda.core.events.channel.voice.GenericVoiceChannelEvent;
+import net.dv8tion.jda.core.events.guild.GenericGuildEvent;
+import net.dv8tion.jda.core.events.message.guild.GenericGuildMessageEvent;
+import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent;
+import net.dv8tion.jda.core.events.role.GenericRoleEvent;
 import net.dv8tion.jda.core.hooks.IEventManager;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -73,6 +80,8 @@ public class AnnotatedEventManager implements IEventManager {
             final Map<Object, List<Method>> listeners = this.methods.get(eventClass);
 
             if (listeners != null) {
+                Class<? extends Event> eventClassFinal = eventClass;
+
                 listeners.entrySet().forEach(e -> e.getValue().forEach(method -> {
                     try {
                         method.setAccessible(true);
@@ -80,10 +89,51 @@ public class AnnotatedEventManager implements IEventManager {
                     } catch (final IllegalAccessException e1) {
                         Hilda.getLogger().log(Level.WARNING, "Encountered a reflection exception while handling event", e1);
                     } catch (final Throwable throwable) {
+                        StringBuilder sb = new StringBuilder();
+
+                        sb.append("An event listener for ").append(eventClassFinal.getName()).append(" encountered an exception");
+
+                        // Provide more information
+                        if (event instanceof GenericGuildEvent) {
+                            GenericGuildEvent ev = (GenericGuildEvent) event;
+                            sb.append(" in ").append(Util.getName(ev.getGuild()));
+                        }
+
+                        if (event instanceof GenericGuildMessageEvent) {
+                            GenericGuildMessageEvent ev = (GenericGuildMessageEvent) event;
+                            sb.append(" with message ").append(ev.getMessageId());
+                            sb.append(" in ").append(Util.getName(ev.getGuild()));
+                        }
+
+                        if (event instanceof GenericGuildMessageReactionEvent) {
+                            GenericGuildMessageReactionEvent ev = (GenericGuildMessageReactionEvent) event;
+                            sb.append(" with message ").append(ev.getMessageId());
+                            sb.append(" in ").append(Util.getName(ev.getGuild()));
+                        }
+
+                        if (event instanceof GenericRoleEvent) {
+                            GenericRoleEvent ev = (GenericRoleEvent) event;
+                            sb.append(" with role ").append(ev.getRole().getId());
+                            sb.append(" in ").append(Util.getName(ev.getGuild()));
+                        }
+
+                        if (event instanceof GenericTextChannelEvent) {
+                            GenericTextChannelEvent ev = (GenericTextChannelEvent) event;
+                            sb.append(" with channel ").append(ev.getChannel().getId());
+                            sb.append(" in ").append(Util.getName(ev.getGuild()));
+                        }
+
+                        if (event instanceof GenericVoiceChannelEvent) {
+                            GenericVoiceChannelEvent ev = (GenericVoiceChannelEvent) event;
+                            sb.append(" with channel ").append(ev.getChannel().getId());
+                            sb.append(" in ").append(Util.getName(ev.getGuild()));
+                        }
+
+                        // Log
                         if (throwable instanceof InvocationTargetException && throwable.getCause() != null) {
-                            Hilda.getLogger().log(Level.WARNING, "An event listener encountered an exception", throwable.getCause());
+                            Hilda.getLogger().log(Level.WARNING, sb.toString(), throwable.getCause());
                         } else {
-                            Hilda.getLogger().log(Level.WARNING, "An event listener encountered an exception", throwable);
+                            Hilda.getLogger().log(Level.WARNING, sb.toString(), throwable);
                         }
 
                         if (!(event instanceof UnhandledEventExceptionEvent)) {
