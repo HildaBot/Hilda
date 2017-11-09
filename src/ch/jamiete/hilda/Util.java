@@ -126,6 +126,7 @@ public class Util {
 
         final long years = months / 12;
         if (years > 0) {
+            months -= Math.floor(years * 12);
             duration -= TimeUnit.DAYS.toMillis(years * 365);
         }
 
