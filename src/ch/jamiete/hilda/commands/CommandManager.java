@@ -15,16 +15,16 @@
  *******************************************************************************/
 package ch.jamiete.hilda.commands;
 
-import ch.jamiete.hilda.Hilda;
-import ch.jamiete.hilda.Sanity;
-import ch.jamiete.hilda.Util;
-import ch.jamiete.hilda.events.EventHandler;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+import ch.jamiete.hilda.Hilda;
+import ch.jamiete.hilda.Sanity;
+import ch.jamiete.hilda.Util;
+import ch.jamiete.hilda.events.EventHandler;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
 public class CommandManager {
     /**
@@ -66,7 +66,7 @@ public class CommandManager {
     public List<String> cleanChannelAliases(final List<String> aliases) {
         Sanity.nullCheck(aliases, "Cannot supply null object.");
 
-        List<String> temp = new ArrayList<>();
+        final List<String> temp = new ArrayList<>();
         aliases.stream().filter(a -> !this.isChannelCommand(a)).forEach(temp::add);
 
         return temp;
@@ -200,7 +200,7 @@ public class CommandManager {
         Sanity.falsiness(this.isChannelCommand(command.getName()) && !this.isChannelCommandAlias(command.getName()), "Command name " + command.getName() + " is already registered.");
 
         if (this.isChannelCommand(command.getName()) && this.isChannelCommandAlias(command.getName())) {
-            ChannelCommand temp = this.getChannelCommand(command.getName());
+            final ChannelCommand temp = this.getChannelCommand(command.getName());
             temp.aliases.remove(command.getName().toLowerCase());
             Hilda.getLogger().info("The alias " + command.getName() + " was removed from the command " + command.getName() + " to make way for another command.");
         }

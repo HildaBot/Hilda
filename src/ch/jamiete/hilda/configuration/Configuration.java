@@ -15,17 +15,17 @@
  *******************************************************************************/
 package ch.jamiete.hilda.configuration;
 
-import ch.jamiete.hilda.Hilda;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.logging.Level;
+import org.apache.commons.io.FileUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.commons.io.FileUtils;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.logging.Level;
+import ch.jamiete.hilda.Hilda;
 
 /**
  * A representation of a configuration file loaded from disk. <p>
@@ -91,6 +91,42 @@ public class Configuration {
         }
     }
 
+    public boolean hasBoolean(final String name) {
+        Boolean ret = null;
+
+        try {
+            ret = this.json.get(name).getAsBoolean();
+        } catch (final Exception e) {
+
+        }
+
+        return ret != null;
+    }
+
+    public boolean hasInteger(final String name) {
+        Integer ret = null;
+
+        try {
+            ret = this.json.get(name).getAsInt();
+        } catch (final Exception e) {
+
+        }
+
+        return ret != null;
+    }
+
+    public boolean hasString(final String name) {
+        String ret = null;
+
+        try {
+            ret = this.json.get(name).getAsString();
+        } catch (final Exception e) {
+
+        }
+
+        return ret != null;
+    }
+
     public void load() {
         if (!this.file.exists()) {
             this.json = new JsonObject();
@@ -152,50 +188,14 @@ public class Configuration {
         this.save();
     }
 
-    public void setString(final String name, final String value) {
-        this.json.addProperty(name, value);
-        this.save();
-    }
-
     public void setInteger(final String name, final String value) {
         this.json.addProperty(name, value);
         this.save();
     }
 
-    public boolean hasString(final String name) {
-        String ret = null;
-
-        try {
-            ret = this.json.get(name).getAsString();
-        } catch (Exception e) {
-
-        }
-
-        return ret != null;
-    }
-
-    public boolean hasBoolean(final String name) {
-        Boolean ret = null;
-
-        try {
-            ret = this.json.get(name).getAsBoolean();
-        } catch (Exception e) {
-
-        }
-
-        return ret != null;
-    }
-
-    public boolean hasInteger(final String name) {
-        Integer ret = null;
-
-        try {
-            ret = this.json.get(name).getAsInt();
-        } catch (Exception e) {
-
-        }
-
-        return ret != null;
+    public void setString(final String name, final String value) {
+        this.json.addProperty(name, value);
+        this.save();
     }
 
 }

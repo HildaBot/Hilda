@@ -15,11 +15,11 @@
  *******************************************************************************/
 package ch.jamiete.hilda.commands;
 
-import ch.jamiete.hilda.Hilda;
-import net.dv8tion.jda.core.Permission;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import ch.jamiete.hilda.Hilda;
+import net.dv8tion.jda.core.Permission;
 
 public abstract class GenericCommand implements Command {
     protected final Hilda hilda;
@@ -39,7 +39,7 @@ public abstract class GenericCommand implements Command {
 
     @Override
     public final List<String> getAliases() {
-        return aliases == null ? Collections.emptyList() : Collections.unmodifiableList(this.aliases);
+        return this.aliases == null ? Collections.emptyList() : Collections.unmodifiableList(this.aliases);
     }
 
     @Override
@@ -91,7 +91,7 @@ public abstract class GenericCommand implements Command {
         }
 
         // Create a new list to ensure it is modifiable
-        List<String> temp = new ArrayList<>(aliases.size());
+        final List<String> temp = new ArrayList<>(aliases.size());
         aliases.forEach(a -> temp.add(a.toLowerCase()));
 
         this.aliases = temp;

@@ -15,20 +15,20 @@
  *******************************************************************************/
 package ch.jamiete.hilda.configuration;
 
-import ch.jamiete.hilda.Hilda;
-import ch.jamiete.hilda.Start;
-import ch.jamiete.hilda.plugins.HildaPlugin;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import ch.jamiete.hilda.Hilda;
+import ch.jamiete.hilda.Start;
+import ch.jamiete.hilda.plugins.HildaPlugin;
 
 public class ConfigurationManager {
     private static final int TIME_LIMIT = 5 * 60 * 1000;
     private final List<ConfigurationWrapper> configs = Collections.synchronizedList(new ArrayList<>());
 
-    public ConfigurationManager(Hilda hilda) {
+    public ConfigurationManager(final Hilda hilda) {
         hilda.getExecutor().scheduleWithFixedDelay(() -> {
             this.unload();
         }, 10, 10, TimeUnit.MINUTES);
@@ -84,9 +84,9 @@ public class ConfigurationManager {
     }
 
     public void unload() {
-        long now = System.currentTimeMillis();
-        int size = this.configs.size();
-        this.configs.removeIf(wrapper -> now - wrapper.access >= TIME_LIMIT);
+        final long now = System.currentTimeMillis();
+        final int size = this.configs.size();
+        this.configs.removeIf(wrapper -> now - wrapper.access >= ConfigurationManager.TIME_LIMIT);
 
         if (Start.DEBUG && size > this.configs.size()) {
             Hilda.getLogger().fine("Pruned " + (size - this.configs.size()) + " loaded configuration files.");
