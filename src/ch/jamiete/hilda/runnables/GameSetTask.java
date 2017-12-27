@@ -16,6 +16,7 @@
 package ch.jamiete.hilda.runnables;
 
 import ch.jamiete.hilda.Hilda;
+import ch.jamiete.hilda.Util;
 import net.dv8tion.jda.core.entities.Game;
 
 public class GameSetTask implements Runnable {
@@ -30,7 +31,7 @@ public class GameSetTask implements Runnable {
     @Override
     public void run() {
         Hilda.getLogger().fine("Setting game to " + this.name);
-        this.hilda.getBot().getPresence().setGame(this.name == null ? null : Game.playing(this.name));
+        this.hilda.getBot().getPresence().setGame(this.name == null ? null : Game.playing(Util.strip(this.name)));
     }
 
 }
