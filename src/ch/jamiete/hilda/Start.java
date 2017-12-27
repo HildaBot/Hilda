@@ -50,26 +50,20 @@ public class Start {
 
         final Start start = new Start();
 
-        // Initial global logging configuration
-        for (Handler handler : Logger.getLogger("").getHandlers()) {
-            if (handler instanceof ConsoleHandler) {
-                Logger.getLogger("").removeHandler(handler);
-            }
-        }
-
-        ConsoleHandler handler = new ConsoleHandler();
-        handler.setFormatter(new LogFormat());
-        handler.setLevel(Start.DEBUG ? Level.FINE : Level.INFO);
-        Logger.getLogger("").addHandler(handler);
-
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionListener());
-
         // Hilda startup
         Start.setupLogging();
         start.start(args[0]);
     }
 
-    public static void setupLogging() {
+    public static void setupFileLogging() {
+        final Logger global = Logger.getLogger("");
+
+        for (final Handler handler : global.getHandlers()) {
+            if (handler instanceof FileHandler) {
+                global.removeHandler(handler);
+            }
+        }
+
         try {
             final File file = new File("log");
 
@@ -79,13 +73,47 @@ public class Start {
 
             final FileHandler lfh = new FileHandler("log/hilda_" + new SimpleDateFormat("dd-MM-yyyy").format(Calendar.getInstance().getTime()) + ".log", true);
             lfh.setFormatter(new LogFormat());
-            Hilda.getLogger().addHandler(lfh);
+            lfh.setLevel(Start.DEBUG ? Level.FINE : Level.INFO);
+
+            global.addHandler(lfh);
         } catch (final Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void setupLogging() {
+        Hilda.getLogger().setUseParentHandlers(true);
+
+        final Logger global = Logger.getLogger("");
+
+        // Console logging
+
+        for (final Handler handler : global.getHandlers()) {
+            if (handler instanceof ConsoleHandler) {
+                global.removeHandler(handler);
+            }
+        }
+
+        final ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(new LogFormat());
+        global.addHandler(handler);
+
+        // Uncaught logging
+
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionListener());
+
+        // File logging
+
+        Start.setupFileLogging();
+
+        // Level of logging
 
         if (Start.DEBUG) {
-            Hilda.getLogger().setLevel(Level.FINE);
+            handler.setLevel(Level.FINE);
+            global.setLevel(Level.FINE);
+        } else {
+            handler.setLevel(Level.INFO);
+            global.setLevel(Level.INFO);
         }
     }
 

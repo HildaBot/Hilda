@@ -21,7 +21,7 @@ public class LogRotateTask implements Runnable {
 
     @Override
     public void run() {
-        Start.setupLogging();
+        Start.setupFileLogging();
     }
 
 }
