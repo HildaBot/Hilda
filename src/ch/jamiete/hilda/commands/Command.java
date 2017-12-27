@@ -52,10 +52,22 @@ public interface Command {
     public boolean hasAlias(String alias);
 
     /**
+     * Gets whether the command should be run async.
+     * @return Whether the command should be run async.
+     */
+    public boolean isAsync();
+
+    /**
      * Sets the aliases this command should respond to.
      * @param aliases A list of the aliases the command should respond to.
      */
     public void setAliases(List<String> aliases);
+
+    /**
+     * Sets whether the command should be run async.
+     * @param async Whether the command should be run async.
+     */
+    public void setAsync(boolean async);
 
     /**
      * Sets the description of the command.

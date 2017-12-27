@@ -144,20 +144,22 @@ public class CommandManager {
 
         final String[] temp_args = content.split(" ");
 
-        if (args[0].length() > 0 && args[0].startsWith(CommandManager.PREFIX)) {
-            String label;
+        if (temp_args[0].length() > 0 && temp_args[0].startsWith(CommandManager.PREFIX)) {
+            final String label = temp_args[0].substring(1);
 
-            label = args[0].substring(1);
-            args = Arrays.copyOfRange(args, 1, args.length);
+            if (!this.isChannelCommand(label)) {
+                return;
+            }
 
-            try {
-                if (this.isChannelCommand(label)) {
+            final String[] args = Arrays.copyOfRange(temp_args, 1, temp_args.length);
+            final ChannelCommand command = this.getChannelCommand(label);
+
+            this.executions++;
+
+            final Runnable execute = () -> {
+                try {
                     Hilda.getLogger().info("Executing " + label + " for " + Util.getName(event.getAuthor()) + " (" + event.getAuthor().getId() + ") in " + event.getGuild().getName() + " (" + event.getGuild().getId() + ")");
                     Hilda.getLogger().fine("    > Executing command " + label + "...");
-
-                    final ChannelCommand command = this.getChannelCommand(label);
-
-                    this.executions++;
 
                     if (this.ignoredChannels.contains(event.getChannel().getId()) && !command.shouldTranscend(event.getMessage())) {
                         Hilda.getLogger().fine("Ignoring message due to ignore override");
@@ -178,14 +180,22 @@ public class CommandManager {
                     }
 
                     Hilda.getLogger().fine("    > Finished execution.");
+                } catch (final Exception e) {
+                    Hilda.getLogger().log(Level.WARNING, "Encountered an exception while executing " + label + " for " + event.getMember().getEffectiveName() + " in " + event.getGuild().getName(), e);
+                    event.getChannel().sendMessage("Something went wrong while executing that command.").queue();
                 }
-            } catch (final Exception e) {
-                Hilda.getLogger().log(Level.WARNING, "Encountered an exception while executing " + label + " for " + event.getMember().getEffectiveName() + " in " + event.getGuild().getName(), e);
-                event.getChannel().sendMessage("Something went wrong while executing that command.").queue();
+            };
+
+            if (command.isAsync()) {
+                new Thread(execute).start();
+                Hilda.getLogger().fine("Passed message off to an async thread.");
+            } else {
+                execute.run();
             }
         }
 
         Hilda.getLogger().fine("Finished handling message in " + (System.currentTimeMillis() - start) + "ms.");
+
     }
 
     /**

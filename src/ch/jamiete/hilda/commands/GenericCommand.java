@@ -32,6 +32,7 @@ public abstract class GenericCommand implements Command {
 
     boolean aliasesFinal = false;
     private boolean hide = false;
+    private boolean async = false;
 
     GenericCommand(final Hilda hilda) {
         this.hilda = hilda;
@@ -78,6 +79,11 @@ public abstract class GenericCommand implements Command {
         return this.aliases.stream().anyMatch(a -> a.equalsIgnoreCase(test));
     }
 
+    @Override
+    public boolean isAsync() {
+        return this.async;
+    }
+
     /**
      * {@inheritDoc}
      * The aliases will be saved as a copy of the provided list. If there are no aliases to be recognised by this channel do not invoke this method.
@@ -98,7 +104,12 @@ public abstract class GenericCommand implements Command {
     }
 
     @Override
-    public final void setDescription(final String description) {
+    public void setAsync(final boolean async) {
+        this.async = async;
+    }
+
+    @Override
+    public void setDescription(final String description) {
         this.description = description;
     }
 
