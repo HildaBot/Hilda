@@ -137,10 +137,12 @@ public class CommandManager {
             return;
         }
 
-        final long start = System.currentTimeMillis();
-        Hilda.getLogger().fine("Determining message \"" + event.getMessage().getRawContent() + "\" by " + event.getAuthor().getName() + "...");
+        final String content = event.getMessage().getContentRaw();
 
-        String[] args = event.getMessage().getRawContent().split(" ");
+        final long start = System.currentTimeMillis();
+        Hilda.getLogger().fine("Determining message \"" + content + "\" by " + event.getAuthor().getName() + "...");
+
+        final String[] temp_args = content.split(" ");
 
         if (args[0].length() > 0 && args[0].startsWith(CommandManager.PREFIX)) {
             String label;
