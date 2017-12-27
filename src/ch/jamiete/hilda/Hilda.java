@@ -15,6 +15,11 @@
  *******************************************************************************/
 package ch.jamiete.hilda;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.security.auth.login.LoginException;
 import ch.jamiete.hilda.commands.CommandManager;
 import ch.jamiete.hilda.configuration.ConfigurationManager;
 import ch.jamiete.hilda.events.AnnotatedEventManager;
@@ -27,11 +32,6 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
-import javax.security.auth.login.LoginException;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Hilda {
     private static final Logger LOGGER = Logger.getLogger("Hilda");
