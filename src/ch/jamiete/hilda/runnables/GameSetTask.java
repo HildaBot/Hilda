@@ -30,7 +30,7 @@ public class GameSetTask implements Runnable {
     @Override
     public void run() {
         Hilda.getLogger().fine("Setting game to " + this.name);
-        this.hilda.getBot().getPresence().setGame(this.name == null ? null : Game.of(this.name));
+        this.hilda.getBot().getPresence().setGame(this.name == null ? null : Game.playing(this.name));
     }
 
 }
