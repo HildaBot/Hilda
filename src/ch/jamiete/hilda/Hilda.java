@@ -42,7 +42,7 @@ public class Hilda {
 
     protected final JDA bot;
 
-    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(3, new HildaThreadFactory());
+    private final ScheduledThreadPoolExecutor executor = new HildaScheduledExecutor(3, new HildaThreadFactory());
 
     private CommandManager commander;
     private ConfigurationManager configs;
