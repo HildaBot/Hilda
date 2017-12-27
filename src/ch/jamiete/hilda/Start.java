@@ -73,7 +73,7 @@ public class Start {
 
             final FileHandler lfh = new FileHandler("log/hilda_" + new SimpleDateFormat("dd-MM-yyyy").format(Calendar.getInstance().getTime()) + ".log", true);
             lfh.setFormatter(new LogFormat());
-            lfh.setLevel(Start.DEBUG ? Level.FINE : Level.INFO);
+            lfh.setLevel(Level.INFO);
 
             global.addHandler(lfh);
         } catch (final Exception e) {
