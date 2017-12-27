@@ -15,9 +15,9 @@
  *******************************************************************************/
 package ch.jamiete.hilda.runnables;
 
-import ch.jamiete.hilda.Hilda;
 import java.io.File;
 import java.util.logging.Level;
+import ch.jamiete.hilda.Hilda;
 
 public class FileDeletionTask implements Runnable {
     private final File file;

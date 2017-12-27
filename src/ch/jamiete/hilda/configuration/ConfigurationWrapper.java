@@ -17,14 +17,14 @@ package ch.jamiete.hilda.configuration;
 
 class ConfigurationWrapper {
     String name;
-    private Configuration configuration;
+    private final Configuration configuration;
     long access;
 
-    ConfigurationWrapper(String name, Configuration configuration) {
+    ConfigurationWrapper(final String name, final Configuration configuration) {
         this(name, configuration, System.currentTimeMillis());
     }
 
-    ConfigurationWrapper(String name, Configuration configuration, long access) {
+    ConfigurationWrapper(final String name, final Configuration configuration, final long access) {
         this.name = name;
         this.configuration = configuration;
         this.access = access;

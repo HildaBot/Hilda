@@ -15,13 +15,6 @@
  *******************************************************************************/
 package ch.jamiete.hilda;
 
-import ch.jamiete.hilda.runnables.MessageDeletionTask;
-import net.dv8tion.jda.core.entities.Channel;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -29,6 +22,13 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import ch.jamiete.hilda.runnables.MessageDeletionTask;
+import net.dv8tion.jda.core.entities.Channel;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.entities.User;
 
 public class Util {
     public static long TIME_5M = 300000, TIME_10M = 600000, TIME_15M = 900000,
@@ -188,6 +188,15 @@ public class Util {
     }
 
     /**
+     * Gets the name of the Guild in a format that is amenable to use in logs or administrator-facing contexts.
+     * @param guild The guild whose name should be given
+     * @return The guild's underlying username and its id in parentheses (e.g. Example#23482348203984)
+     */
+    public static String getName(final Guild guild) {
+        return guild.getName() + " (" + guild.getId() + ")";
+    }
+
+    /**
      * Gets the name of the Member in a format that is amenable to use in logs or administrator-facing contexts. <br>
      * Wraps {@link #getName(User)} to avoid long lines of code.
      * @param member The user whose name should be given
@@ -204,15 +213,6 @@ public class Util {
      */
     public static String getName(final User user) {
         return user.getName() + "#" + user.getDiscriminator();
-    }
-
-    /**
-     * Gets the name of the Guild in a format that is amenable to use in logs or administrator-facing contexts.
-     * @param guild The guild whose name should be given
-     * @return The guild's underlying username and its id in parentheses (e.g. Example#23482348203984)
-     */
-    public static String getName(final Guild guild) {
-        return guild.getName() + " (" + guild.getId() + ")";
     }
 
     /**

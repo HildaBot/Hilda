@@ -15,9 +15,9 @@
  *******************************************************************************/
 package ch.jamiete.hilda.runnables;
 
+import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.plugins.HildaPlugin;
-import java.util.logging.Level;
 
 public class HeartbeatTask implements Runnable {
     private final Hilda hilda;

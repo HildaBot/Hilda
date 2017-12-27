@@ -15,9 +15,6 @@
  *******************************************************************************/
 package ch.jamiete.hilda;
 
-import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
-import net.dv8tion.jda.core.exceptions.RateLimitedException;
-import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -26,6 +23,9 @@ import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.security.auth.login.LoginException;
+import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
+import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
 public class Start {
     /**

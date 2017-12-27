@@ -43,6 +43,19 @@ package ch.jamiete.hilda;
  */
 public final class Sanity {
     /**
+     * Checks if a boolean is false.
+     *
+     * @param bool value to test
+     * @param failMessage message to throw
+     * @throws IllegalArgumentException if true
+     */
+    public static void falsiness(final boolean bool, final String failMessage) {
+        if (bool) {
+            throw new IllegalArgumentException(failMessage);
+        }
+    }
+
+    /**
      * Checks if an object is null.
      *
      * @param object object to check
@@ -113,19 +126,6 @@ public final class Sanity {
      */
     public static void truthiness(final boolean bool, final String failMessage) {
         if (!bool) {
-            throw new IllegalArgumentException(failMessage);
-        }
-    }
-
-    /**
-     * Checks if a boolean is false.
-     *
-     * @param bool value to test
-     * @param failMessage message to throw
-     * @throws IllegalArgumentException if true
-     */
-    public static void falsiness(final boolean bool, final String failMessage) {
-        if (bool) {
             throw new IllegalArgumentException(failMessage);
         }
     }
