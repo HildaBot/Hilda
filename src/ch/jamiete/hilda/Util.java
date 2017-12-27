@@ -31,6 +31,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class Util {
+    public static long TIME_5M = 300000, TIME_10M = 600000, TIME_15M = 900000,
+            TIME_1H = 3600000, TIME_24H = 86400000;
+
     private static Hilda HILDA = null;
 
     /**
