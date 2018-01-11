@@ -62,7 +62,9 @@ public class Hilda {
      */
     public void addAllowedServer(final String id) {
         synchronized (this.allowed) {
-            this.allowed.add(id);
+            if (!this.allowed.contains(id)) {
+                this.allowed.add(id);
+            }
         }
     }
 
