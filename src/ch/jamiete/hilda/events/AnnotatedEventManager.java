@@ -66,6 +66,12 @@ public class AnnotatedEventManager implements IEventManager {
     private final Set<Object> listeners = new HashSet<>();
     private final Map<Class<? extends Event>, Map<Object, List<Method>>> methods = new HashMap<>();
 
+    private Hilda hilda;
+
+    public AnnotatedEventManager(Hilda hilda) {
+        this.hilda = hilda;
+    }
+
     @Override
     public List<Object> getRegisteredListeners() {
         return Collections.unmodifiableList(new LinkedList<>(this.listeners));
@@ -75,6 +81,62 @@ public class AnnotatedEventManager implements IEventManager {
     @SuppressWarnings("unchecked")
     public void handle(final Event event) {
         Class<? extends Event> eventClass = event.getClass();
+
+        // Check if server's events should be ignored
+
+        List<String> allowed = hilda.getAllowedServers();
+
+        if (!allowed.isEmpty()) {
+            if (event instanceof GenericGuildEvent) {
+                final GenericGuildEvent ev = (GenericGuildEvent) event;
+
+                if (!allowed.contains(ev.getGuild().getId())) {
+                    return;
+                }
+            }
+
+            if (event instanceof GenericGuildMessageEvent) {
+                final GenericGuildMessageEvent ev = (GenericGuildMessageEvent) event;
+
+                if (!allowed.contains(ev.getGuild().getId())) {
+                    return;
+                }
+            }
+
+            if (event instanceof GenericGuildMessageReactionEvent) {
+                final GenericGuildMessageReactionEvent ev = (GenericGuildMessageReactionEvent) event;
+
+                if (!allowed.contains(ev.getGuild().getId())) {
+                    return;
+                }
+            }
+
+            if (event instanceof GenericRoleEvent) {
+                final GenericRoleEvent ev = (GenericRoleEvent) event;
+
+                if (!allowed.contains(ev.getGuild().getId())) {
+                    return;
+                }
+            }
+
+            if (event instanceof GenericTextChannelEvent) {
+                final GenericTextChannelEvent ev = (GenericTextChannelEvent) event;
+
+                if (!allowed.contains(ev.getGuild().getId())) {
+                    return;
+                }
+            }
+
+            if (event instanceof GenericVoiceChannelEvent) {
+                final GenericVoiceChannelEvent ev = (GenericVoiceChannelEvent) event;
+
+                if (!allowed.contains(ev.getGuild().getId())) {
+                    return;
+                }
+            }
+        }
+
+        // Send event to all relevant listeners
 
         do {
             final Map<Object, List<Method>> listeners = this.methods.get(eventClass);

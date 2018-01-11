@@ -15,6 +15,9 @@
  *******************************************************************************/
 package ch.jamiete.hilda;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -43,13 +46,39 @@ public class Hilda {
     protected final JDA bot;
 
     private final ScheduledThreadPoolExecutor executor = new HildaScheduledExecutor(3, new HildaThreadFactory());
+    private final List<String> allowed = new ArrayList<String>();
 
     private CommandManager commander;
     private ConfigurationManager configs;
     private PluginManager plugins;
 
     public Hilda(final String apikey) throws LoginException, IllegalArgumentException, InterruptedException, RateLimitedException {
-        this.bot = new JDABuilder(AccountType.BOT).setAutoReconnect(false).setToken(apikey).setEventManager(new AnnotatedEventManager()).setStatus(OnlineStatus.DO_NOT_DISTURB).buildBlocking();
+        this.bot = new JDABuilder(AccountType.BOT).setAutoReconnect(false).setToken(apikey).setEventManager(new AnnotatedEventManager(this)).setStatus(OnlineStatus.DO_NOT_DISTURB).buildBlocking();
+    }
+
+    /**
+     * Adds a server to the list of allowed servers.
+     * @param id The ID of the server
+     */
+    public void addAllowedServer(final String id) {
+        synchronized (this.allowed) {
+            this.allowed.add(id);
+        }
+    }
+
+    /**
+     * Get a list of server IDs that should be allowed to trigger code. <p>
+     * This may return an empty list.
+     * @return Unmodifiable list of server IDs
+     */
+    public List<String> getAllowedServers() {
+        synchronized (this.allowed) {
+            if (this.allowed.size() == 0) {
+                return Collections.emptyList();
+            }
+
+            return Util.unmodifiableList(this.allowed);
+        }
     }
 
     /**
@@ -93,6 +122,16 @@ public class Hilda {
      */
     public String getUsername() {
         return this.bot.getSelfUser().getName();
+    }
+
+    /**
+     * Removes a server from the list of allowed servers.
+     * @param id The ID of the server
+     */
+    public void removeAllowedServer(final String id) {
+        synchronized (this.allowed) {
+            this.allowed.remove(id);
+        }
     }
 
     /**
