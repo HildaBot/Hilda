@@ -19,6 +19,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.List;
@@ -105,6 +106,17 @@ public class Util {
         //return the stripped text, escape all remaining formatting characters (did not have matching
         // open/close before or were left/right of block
         return out.toString().replace("*", "\\*").replace("_", "\\_").replace("~", "\\~");
+    }
+
+    /**
+     * Returns a read-only copy of the list provided.
+     * @param original The list to copy
+     * @return A read-only copy
+     */
+    public static <T> List<T> unmodifiableList(List<T> original) {
+        ArrayList<T> list = new ArrayList<>(original.size());
+        original.forEach(list::add);
+        return Collections.unmodifiableList(list);
     }
 
     /**
