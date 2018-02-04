@@ -55,6 +55,10 @@ public class ConsoleListener extends Thread {
                     this.hilda.getConfigurationManager().save();
                     Hilda.getLogger().info("Configurations saved!");
 
+                    Hilda.getLogger().info("Disconnecting from database...");
+                    this.hilda.getHildaDb().disconnect();
+                    Hilda.getLogger().info("Disconnected from the database!");
+
                     Hilda.getLogger().info("Shutting down executor...");
                     this.hilda.getExecutor().shutdown();
                     try {

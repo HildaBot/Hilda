@@ -15,12 +15,6 @@
  *******************************************************************************/
 package ch.jamiete.hilda;
 
-import java.util.Calendar;
-import java.util.TimeZone;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-import javax.security.auth.login.LoginException;
 import ch.jamiete.hilda.commands.CommandManager;
 import ch.jamiete.hilda.configuration.ConfigurationManager;
 import ch.jamiete.hilda.events.AnnotatedEventManager;
@@ -35,6 +29,11 @@ import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.utils.SimpleLog;
 
+import javax.security.auth.login.LoginException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+
 public class Hilda {
     private static final Logger LOGGER = Logger.getLogger("Hilda");
 
@@ -42,15 +41,16 @@ public class Hilda {
         return Hilda.LOGGER;
     }
 
-    protected final JDA bot;
+    final JDA bot;
 
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(3, new HildaThreadFactory());
 
     private CommandManager commander;
     private ConfigurationManager configs;
     private PluginManager plugins;
+    private HildaDB db;
 
-    public Hilda(final String apikey) throws LoginException, IllegalArgumentException, InterruptedException, RateLimitedException {
+    public Hilda(final String apikey) throws LoginException, InterruptedException, RateLimitedException {
         this.bot = new JDABuilder(AccountType.BOT).setAutoReconnect(false).setToken(apikey).setEventManager(new AnnotatedEventManager()).setStatus(OnlineStatus.DO_NOT_DISTURB).buildBlocking();
 
         if (Start.DEBUG) {
@@ -81,41 +81,17 @@ public class Hilda {
     }
 
     /**
+     * @return The {@link HildaDB} instance
+     */
+    public HildaDB getHildaDb() {
+        return this.db;
+    }
+
+    /**
      * @return The {@link ScheduledThreadPoolExecutor} instance
      */
     public ScheduledThreadPoolExecutor getExecutor() {
         return this.executor;
-    }
-
-    /**
-     * Helper method <br>
-     * Gets the milliseconds of the nearest hour in timezone.
-     * @param timezone The timezone to check.
-     * @return The next hour in timezone.
-     */
-    public long getNextHour(final String timezone) {
-        final Calendar time = Calendar.getInstance(TimeZone.getTimeZone(timezone));
-        time.set(Calendar.MINUTE, 0);
-        time.set(Calendar.SECOND, 0);
-        time.set(Calendar.MILLISECOND, 0);
-        time.add(Calendar.HOUR, 1);
-        return time.getTimeInMillis();
-    }
-
-    /**
-     * Helper method <br>
-     * Gets the milliseconds of the next midnight in timezone.
-     * @param timezone The timezone to check.
-     * @return The next midnight in timezone.
-     */
-    public long getNextMidnightInMillis(final String timezone) {
-        final Calendar time = Calendar.getInstance(TimeZone.getTimeZone(timezone));
-        time.set(Calendar.HOUR_OF_DAY, 0);
-        time.set(Calendar.MINUTE, 0);
-        time.set(Calendar.SECOND, 0);
-        time.set(Calendar.MILLISECOND, 0);
-        time.add(Calendar.DAY_OF_MONTH, 1);
-        return time.getTimeInMillis();
     }
 
     /**
@@ -133,7 +109,7 @@ public class Hilda {
         return this.bot.getSelfUser().getName();
     }
 
-    public void start() {
+    void start() {
         this.bot.setAutoReconnect(true);
         Hilda.getLogger().info("Connected to server!");
 
@@ -143,7 +119,7 @@ public class Hilda {
         this.executor.setRemoveOnCancelPolicy(true);
         this.executor.setMaximumPoolSize(10);
 
-        final long rotate = this.getNextMidnightInMillis("GMT+10") - System.currentTimeMillis();
+        final long rotate = Util.getNextMidnightInMillis("GMT+10") - System.currentTimeMillis();
         this.executor.scheduleAtFixedRate(new LogRotateTask(), rotate, 86400000, TimeUnit.MILLISECONDS); // At midnight then every 24 hours
         Hilda.getLogger().info("Rotating log files in " + Util.getFriendlyTime(rotate));
 
@@ -153,6 +129,7 @@ public class Hilda {
         this.commander = new CommandManager(this);
         this.configs = new ConfigurationManager();
         this.plugins = new PluginManager(this);
+        this.db = new HildaDB();
         Hilda.getLogger().info("Managers registered!");
 
         Hilda.getLogger().info("Registering listeners...");
@@ -168,11 +145,13 @@ public class Hilda {
         this.plugins.enablePlugins();
         Hilda.getLogger().info("Plugins enabled!");
 
+        Hilda.getLogger().info("Connecting to database...");
+        this.db.connect();
+
         Hilda.getLogger().info("Done!");
 
         this.bot.getPresence().setStatus(OnlineStatus.ONLINE);
 
         Hilda.getLogger().info("Startup complete!");
     }
-
 }
