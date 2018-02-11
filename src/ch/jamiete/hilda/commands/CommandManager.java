@@ -15,16 +15,18 @@
  *******************************************************************************/
 package ch.jamiete.hilda.commands;
 
+import ch.jamiete.hilda.Hilda;
+import ch.jamiete.hilda.Sanity;
+import ch.jamiete.hilda.Util;
+import ch.jamiete.hilda.events.EventHandler;
+import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.MessageBuilder.Formatting;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
-import ch.jamiete.hilda.Hilda;
-import ch.jamiete.hilda.Sanity;
-import ch.jamiete.hilda.Util;
-import ch.jamiete.hilda.events.EventHandler;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
 public class CommandManager {
     /**
@@ -153,6 +155,20 @@ public class CommandManager {
 
             final String[] args = Arrays.copyOfRange(temp_args, 1, temp_args.length);
             final ChannelCommand command = this.getChannelCommand(label);
+
+            if (!event.getChannel().canTalk()) {
+                event.getAuthor().openPrivateChannel().queue(channel-> {
+                    MessageBuilder mb = new MessageBuilder();
+                    mb.append("I can't run your command in ");
+                    mb.append("#" + event.getChannel().getName(), Formatting.BOLD);
+                    mb.append(" on ").append(event.getGuild().getName(), Formatting.BOLD);
+                    mb.append(" because I don't have permission to speak in that channel. Please ask an administrator or the owner (");
+                    mb.append(event.getGuild().getOwner().getAsMention()).append(") to grant me the appropriate permissions.");
+                    channel.sendMessage(mb.build());
+                }, failure -> {});
+
+                return;
+            }
 
             this.executions++;
 
