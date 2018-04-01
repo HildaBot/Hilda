@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import javax.security.auth.login.LoginException;
 import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
+import net.dv8tion.jda.core.requests.RestAction;
 
 public class Start {
     /**
@@ -124,6 +125,9 @@ public class Start {
     private void start(final String apikey) {
         if (Start.DEBUG) {
             Hilda.getLogger().fine("Debug enabled.");
+
+            RestAction.setPassContext(true);
+            RestAction.DEFAULT_FAILURE = Throwable::printStackTrace;
         }
 
         try {
