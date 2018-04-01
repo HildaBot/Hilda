@@ -30,10 +30,12 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import ch.jamiete.hilda.runnables.MessageDeletionTask;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.PermissionOverride;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
 
@@ -42,6 +44,56 @@ public class Util {
             TIME_1H = 3600000, TIME_24H = 86400000;
 
     private static Hilda HILDA = null;
+
+    public static void allow(Channel channel, Member member, Permission... permissions) {
+        PermissionOverride override = channel.getPermissionOverride(member);
+
+        if (override != null) {
+            List<Permission> allow = new ArrayList<>();
+            List<Permission> allowed = override.getAllowed();
+
+            for (Permission permission : permissions) {
+                if (!allowed.contains(permission)) {
+                    allow.add(permission);
+                }
+            }
+
+            if (!allow.isEmpty()) {
+                override.getManager().grant(allow).queue();
+            }
+        } else {
+            channel.createPermissionOverride(member).setAllow(permissions).queue();
+        }
+    }
+
+    public static void deny(Channel channel, Member member, Permission... permissions) {
+        PermissionOverride override = channel.getPermissionOverride(member);
+
+        if (override != null) {
+            List<Permission> deny = new ArrayList<>();
+            List<Permission> denied = override.getDenied();
+
+            for (Permission permission : permissions) {
+                if (!denied.contains(permission)) {
+                    deny.add(permission);
+                }
+            }
+
+            if (!deny.isEmpty()) {
+                override.getManager().deny(deny).queue();
+            }
+        } else {
+            channel.createPermissionOverride(member).setDeny(permissions).queue();
+        }
+    }
+
+    public static void clear(Channel channel, Member member, Permission... permissions) {
+        PermissionOverride override = channel.getPermissionOverride(member);
+
+        if (override != null) {
+            override.getManager().clear(permissions).queue();
+        }
+    }
 
     /**
      * Removes the formatting characters from an input.
