@@ -15,18 +15,20 @@
  *******************************************************************************/
 package ch.jamiete.hilda.commands;
 
-import ch.jamiete.hilda.Hilda;
-import ch.jamiete.hilda.Sanity;
-import ch.jamiete.hilda.Util;
-import ch.jamiete.hilda.events.EventHandler;
-import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.MessageBuilder.Formatting;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import ch.jamiete.hilda.Hilda;
+import ch.jamiete.hilda.Sanity;
+import ch.jamiete.hilda.Util;
+import ch.jamiete.hilda.events.EventHandler;
+import ch.jamiete.hilda.runnables.CommandCleanupTask;
+import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.MessageBuilder.Formatting;
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 
 public class CommandManager {
     /**
@@ -45,6 +47,8 @@ public class CommandManager {
         this.channelCommands = new ArrayList<>();
         this.ignoredChannels = new ArrayList<>();
         this.ignoredUsers = new ArrayList<>();
+
+        this.hilda.getExecutor().scheduleWithFixedDelay(new CommandCleanupTask(this), 10, 10, TimeUnit.MINUTES);
     }
 
     public void addIgnoredChannel(final String id) {
@@ -157,7 +161,7 @@ public class CommandManager {
             final ChannelCommand command = this.getChannelCommand(label);
 
             if (!event.getChannel().canTalk()) {
-                event.getAuthor().openPrivateChannel().queue(channel-> {
+                event.getAuthor().openPrivateChannel().queue(channel -> {
                     MessageBuilder mb = new MessageBuilder();
                     mb.append("I can't run your command in ");
                     mb.append("#" + event.getChannel().getName(), Formatting.BOLD);
@@ -165,7 +169,8 @@ public class CommandManager {
                     mb.append(" because I don't have permission to speak in that channel. Please ask an administrator or the owner (");
                     mb.append(event.getGuild().getOwner().getAsMention()).append(") to grant me the appropriate permissions.");
                     channel.sendMessage(mb.build());
-                }, failure -> {});
+                }, failure -> {
+                });
 
                 return;
             }
@@ -192,7 +197,12 @@ public class CommandManager {
                         event.getChannel().sendMessage("You don't have permission to use that command.").queue();
                         Hilda.getLogger().fine("    > No permission.");
                     } else {
-                        command.execute(event.getMessage(), args, label);
+                        if (command.canExecute(event.getAuthor().getId())) {
+                            command.markExecuted(event.getAuthor().getId());
+                            command.execute(event.getMessage(), args, label);
+                        } else {
+                            event.getChannel().sendMessage("Slow down! You must wait at least " + command.getTimeout() + "s between command invocations.").queue(Util.deleteAfter(5));
+                        }
                     }
 
                     Hilda.getLogger().fine("    > Finished execution.");

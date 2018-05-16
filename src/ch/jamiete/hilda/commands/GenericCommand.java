@@ -17,7 +17,9 @@ package ch.jamiete.hilda.commands;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import ch.jamiete.hilda.Hilda;
 import net.dv8tion.jda.core.Permission;
 
@@ -33,6 +35,9 @@ public abstract class GenericCommand implements Command {
     boolean aliasesFinal = false;
     private boolean hide = false;
     private boolean async = false;
+
+    private int timeout = 0;
+    private Map<String, Long> timeouts;
 
     GenericCommand(final Hilda hilda) {
         this.hilda = hilda;
@@ -138,6 +143,78 @@ public abstract class GenericCommand implements Command {
         }
 
         this.name = name;
+    }
+
+    /**
+     * Gets the timeout in seconds between command invocations per user.
+     * @return timeout in seconds
+     */
+    public int getTimeout() {
+        return timeout;
+    }
+
+    /**
+     * Sets the timeout in seconds between command invocations per user. Set to 0 for no timeout.
+     * @param timeout timeout in seconds
+     */
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+
+        if (timeout == 0) {
+            this.timeouts = null;
+        } else {
+            this.timeouts = Collections.synchronizedMap(new HashMap<>());
+        }
+    }
+
+    /**
+     * Gets whether a particular user can execute the command with regards to the timeout.
+     * @param id The user to check
+     * @return Whether that user can execute the command
+     */
+    public boolean canExecute(String id) {
+        if (this.timeout == 0) {
+            return true;
+        }
+
+        long last = this.timeouts.getOrDefault(id, 0L);
+
+        if (last == 0) {
+            return true;
+        }
+
+        return System.currentTimeMillis() - last >= this.timeout * 1000;
+    }
+
+    /**
+     * Marks the command as executed by the user at the current time for the timeout timer.
+     * @param id
+     */
+    public void markExecuted(String id) {
+        if (this.timeouts == null) {
+            return;
+        }
+
+        this.timeouts.put(id, System.currentTimeMillis());
+    }
+
+    /**
+     * Empties the old timeouts from the cache.
+     */
+    public void clearTimeouts() {
+        if (this.timeouts == null) {
+            return;
+        }
+
+        synchronized (this.timeouts) {
+            this.timeouts.entrySet().removeIf(entry -> {
+                if (System.currentTimeMillis() - entry.getValue() >= this.timeout * 1000) {
+                    return true;
+                }
+
+                return false;
+            });
+        }
     }
 
 }
