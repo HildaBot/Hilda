@@ -30,6 +30,7 @@ import ch.jamiete.hilda.listeners.ConsoleListener;
 import ch.jamiete.hilda.plugins.PluginManager;
 import ch.jamiete.hilda.runnables.HeartbeatTask;
 import ch.jamiete.hilda.runnables.LogRotateTask;
+import ch.jamiete.hilda.sql.DatabaseManager;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -50,6 +51,7 @@ public class Hilda {
 
     private CommandManager commander;
     private ConfigurationManager configs;
+    private DatabaseManager databases;
     private PluginManager plugins;
 
     public Hilda(final String apikey) throws LoginException, IllegalArgumentException, InterruptedException, RateLimitedException {
@@ -105,6 +107,13 @@ public class Hilda {
     }
 
     /**
+     * @return The {@link DatabaseManager} instance
+     */
+    public DatabaseManager getDatabaseManager() {
+        return this.databases;
+    }
+
+    /**
      * @return The {@link ScheduledThreadPoolExecutor} instance
      */
     public ScheduledThreadPoolExecutor getExecutor() {
@@ -154,6 +163,12 @@ public class Hilda {
         this.configs.save();
         Hilda.getLogger().info("Configurations saved!");
 
+        if (this.databases.getDataSource() != null) {
+            Hilda.getLogger().info("Disconnecting from databases...");
+            this.databases.getDataSource().close();
+            Hilda.getLogger().info("Disconnected from databases!");
+        }
+
         Hilda.getLogger().info("Shutting down executor...");
         this.executor.shutdown();
         try {
@@ -190,6 +205,7 @@ public class Hilda {
         Hilda.getLogger().info("Registering managers...");
         this.commander = new CommandManager(this);
         this.configs = new ConfigurationManager(this);
+        this.databases = new DatabaseManager(this);
         this.plugins = new PluginManager(this);
         Hilda.getLogger().info("Managers registered!");
 
