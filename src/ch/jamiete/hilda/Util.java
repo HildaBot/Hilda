@@ -22,6 +22,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import ch.jamiete.hilda.runnables.MessageDeletionTask;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Channel;
@@ -90,7 +92,18 @@ public class Util {
     public static void clear(Channel channel, Member member, Permission... permissions) {
         PermissionOverride override = channel.getPermissionOverride(member);
 
-        if (override != null) {
+        if (override == null) {
+            return;
+        }
+
+        EnumSet<Permission> oset = Permission.toEnumSet(override.getAllowedRaw()); // Override set
+        oset.addAll(Permission.toEnumSet(override.getDeniedRaw()));
+
+        EnumSet<Permission> aset = Arrays.stream(permissions).collect(Collectors.toCollection(() -> EnumSet.noneOf(Permission.class))); // Argument set
+
+        if (oset.equals(aset)) {
+            override.delete().queue();
+        } else {
             override.getManager().clear(permissions).queue();
         }
     }
