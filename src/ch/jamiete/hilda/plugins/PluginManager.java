@@ -30,6 +30,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -47,18 +53,37 @@ public class PluginManager {
     }
 
     public void disablePlugins() {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
         synchronized (this.plugins) {
             final Iterator<HildaPlugin> iterator = this.plugins.iterator();
 
             while (iterator.hasNext()) {
                 final HildaPlugin entry = iterator.next();
 
+                Future<?> future = executor.submit(() -> {
+                    try {
+                        entry.onDisable();
+                    } catch (final Exception e) {
+                        Hilda.getLogger().log(Level.WARNING, "Encountered an exception while disabling plugin " + entry.getPluginData().getName(), e);
+                    }
+                });
+
                 try {
-                    entry.onDisable();
-                } catch (final Exception e) {
-                    Hilda.getLogger().log(Level.WARNING, "Encountered an exception while disabling plugin " + entry.getPluginData().getName(), e);
+                    future.get(30, TimeUnit.SECONDS);
+                } catch (InterruptedException | ExecutionException
+                        | TimeoutException e) {
+                    Hilda.getLogger().log(Level.WARNING, "Plugin " + entry.getPluginData().getName() + " took too long disabling; ceased executing its code", e);
                 }
             }
+        }
+
+        executor.shutdown();
+
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Hilda.getLogger().log(Level.WARNING, "Encountered an exception during the plugin disable grace period", e);
         }
     }
 
