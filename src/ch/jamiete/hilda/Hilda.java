@@ -163,12 +163,6 @@ public class Hilda {
         this.configs.save();
         Hilda.getLogger().info("Configurations saved!");
 
-        if (this.databases.getDataSource() != null) {
-            Hilda.getLogger().info("Disconnecting from databases...");
-            this.databases.getDataSource().close();
-            Hilda.getLogger().info("Disconnected from databases!");
-        }
-
         Hilda.getLogger().info("Shutting down executor...");
         this.executor.shutdown();
         try {
@@ -178,6 +172,12 @@ public class Hilda {
         }
         Hilda.getLogger().info("Executor completed " + this.executor.getCompletedTaskCount() + " with largest pool of " + this.executor.getLargestPoolSize());
         Hilda.getLogger().info("Executor shut down!");
+
+        if (this.databases.getDataSource() != null) {
+            Hilda.getLogger().info("Disconnecting from databases...");
+            this.databases.getDataSource().close();
+            Hilda.getLogger().info("Disconnected from databases!");
+        }
 
         Hilda.getLogger().info("Disconnecting from Discord...");
         this.bot.shutdown();
