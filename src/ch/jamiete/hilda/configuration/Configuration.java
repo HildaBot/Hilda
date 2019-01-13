@@ -41,15 +41,18 @@ public class Configuration {
     }
 
     public JsonObject get() {
+        this.safety();
         return this.json;
     }
 
     public JsonArray getArray(final String name) {
+        this.safety();
         final JsonArray array = this.json.getAsJsonArray(name);
         return array == null ? new JsonArray() : array;
     }
 
     public boolean getBoolean(final String name, final boolean def) {
+        this.safety();
         final JsonElement ele = this.json.get(name);
 
         if (ele == null) {
@@ -64,6 +67,7 @@ public class Configuration {
     }
 
     public int getInteger(final String name, final int def) {
+        this.safety();
         final JsonElement ele = this.json.get(name);
 
         if (ele == null) {
@@ -78,6 +82,7 @@ public class Configuration {
     }
 
     public String getString(final String name, final String def) {
+        this.safety();
         final JsonElement ele = this.json.get(name);
 
         if (ele == null) {
@@ -92,6 +97,7 @@ public class Configuration {
     }
 
     public boolean hasBoolean(final String name) {
+        this.safety();
         Boolean ret = null;
 
         try {
@@ -104,6 +110,7 @@ public class Configuration {
     }
 
     public boolean hasInteger(final String name) {
+        this.safety();
         Integer ret = null;
 
         try {
@@ -116,6 +123,7 @@ public class Configuration {
     }
 
     public boolean hasString(final String name) {
+        this.safety();
         String ret = null;
 
         try {
@@ -184,18 +192,31 @@ public class Configuration {
     }
 
     public void setBoolean(final String name, final boolean value) {
+        this.safety();
         this.json.addProperty(name, value);
         this.save();
     }
 
     public void setInteger(final String name, final String value) {
+        this.safety();
         this.json.addProperty(name, value);
         this.save();
     }
 
     public void setString(final String name, final String value) {
+        this.safety();
         this.json.addProperty(name, value);
         this.save();
+    }
+
+    /**
+     * Ensure that there is no null JSON object at any time during use.
+     */
+    private void safety() {
+        if (this.json == null) {
+            Hilda.getLogger().warning("JSON object in " + this.file.getName() + " was null; re-loading this configuration...");
+            this.load();
+        }
     }
 
 }
