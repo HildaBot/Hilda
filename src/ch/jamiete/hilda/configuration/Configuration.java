@@ -163,6 +163,11 @@ public class Configuration {
                 // Ignore
             }
         }
+
+        if (this.json == null) {
+            Hilda.getLogger().warning("Loading configuration file " + this.file.getName() + " resulted in null object. File error?");
+            this.json = new JsonObject();
+        }
     }
 
     public void reset() {
