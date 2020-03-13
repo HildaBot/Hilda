@@ -32,14 +32,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import ch.jamiete.hilda.runnables.MessageDeletionTask;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Channel;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.PermissionOverride;
-import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.*;
 
 public class Util {
     public static long TIME_5M = 300000, TIME_10M = 600000, TIME_15M = 900000,
@@ -47,12 +41,12 @@ public class Util {
 
     private static Hilda HILDA = null;
 
-    public static void allow(Channel channel, Member member, Permission... permissions) {
+    public static void allow(GuildChannel channel, Member member, Permission... permissions) {
         PermissionOverride override = channel.getPermissionOverride(member);
 
         if (override != null) {
             List<Permission> allow = new ArrayList<>();
-            List<Permission> allowed = override.getAllowed();
+            EnumSet<Permission> allowed = override.getAllowed();
 
             for (Permission permission : permissions) {
                 if (!allowed.contains(permission)) {
@@ -68,12 +62,12 @@ public class Util {
         }
     }
 
-    public static void deny(Channel channel, Member member, Permission... permissions) {
+    public static void deny(GuildChannel channel, Member member, Permission... permissions) {
         PermissionOverride override = channel.getPermissionOverride(member);
 
         if (override != null) {
             List<Permission> deny = new ArrayList<>();
-            List<Permission> denied = override.getDenied();
+            EnumSet<Permission> denied = override.getDenied();
 
             for (Permission permission : permissions) {
                 if (!denied.contains(permission)) {
@@ -89,15 +83,15 @@ public class Util {
         }
     }
 
-    public static void clear(Channel channel, Member member, Permission... permissions) {
+    public static void clear(GuildChannel channel, Member member, Permission... permissions) {
         PermissionOverride override = channel.getPermissionOverride(member);
 
         if (override == null) {
             return;
         }
 
-        EnumSet<Permission> oset = Permission.toEnumSet(override.getAllowedRaw()); // Override set
-        oset.addAll(Permission.toEnumSet(override.getDeniedRaw()));
+        EnumSet<Permission> oset = Permission.getPermissions(override.getAllowedRaw()); // Override set
+        oset.addAll(Permission.getPermissions(override.getDeniedRaw()));
 
         EnumSet<Permission> aset = Arrays.stream(permissions).collect(Collectors.toCollection(() -> EnumSet.noneOf(Permission.class))); // Argument set
 
@@ -253,7 +247,7 @@ public class Util {
      * @param channels The channels to list.
      * @return The list of channels. For example, "#general, #voice and #bots".
      */
-    public static String getChannelsAsString(final List<? extends Channel> channels) {
+    public static String getChannelsAsString(final List<? extends GuildChannel> channels) {
         final List<String> strings = new ArrayList<>();
         channels.forEach(c -> strings.add("#" + c.getName()));
         return Util.getAsList(strings);

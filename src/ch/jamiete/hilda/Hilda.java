@@ -30,12 +30,9 @@ import ch.jamiete.hilda.listeners.ConsoleListener;
 import ch.jamiete.hilda.plugins.PluginManager;
 import ch.jamiete.hilda.runnables.HeartbeatTask;
 import ch.jamiete.hilda.runnables.LogRotateTask;
-import ch.jamiete.hilda.sql.DatabaseManager;
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.OnlineStatus;
-import net.dv8tion.jda.core.exceptions.RateLimitedException;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 
 public class Hilda {
     private static final Logger LOGGER = Logger.getLogger("Hilda");
@@ -51,11 +48,10 @@ public class Hilda {
 
     private CommandManager commander;
     private ConfigurationManager configs;
-    private DatabaseManager databases;
     private PluginManager plugins;
 
-    public Hilda(final String apikey) throws LoginException, IllegalArgumentException, InterruptedException, RateLimitedException {
-        this.bot = new JDABuilder(AccountType.BOT).setAutoReconnect(false).setToken(apikey).setEventManager(new AnnotatedEventManager(this)).setStatus(OnlineStatus.DO_NOT_DISTURB).buildBlocking();
+    public Hilda(final String apikey) throws LoginException, IllegalArgumentException, InterruptedException {
+        this.bot = new JDABuilder(apikey).setAutoReconnect(false).setToken(apikey).setEventManager(new AnnotatedEventManager(this)).setStatus(OnlineStatus.DO_NOT_DISTURB).build().awaitReady();
     }
 
     /**
@@ -104,13 +100,6 @@ public class Hilda {
      */
     public ConfigurationManager getConfigurationManager() {
         return this.configs;
-    }
-
-    /**
-     * @return The {@link DatabaseManager} instance
-     */
-    public DatabaseManager getDatabaseManager() {
-        return this.databases;
     }
 
     /**
@@ -173,12 +162,6 @@ public class Hilda {
         Hilda.getLogger().info("Executor completed " + this.executor.getCompletedTaskCount() + " with largest pool of " + this.executor.getLargestPoolSize());
         Hilda.getLogger().info("Executor shut down!");
 
-        if (this.databases.getDataSource() != null) {
-            Hilda.getLogger().info("Disconnecting from databases...");
-            this.databases.getDataSource().close();
-            Hilda.getLogger().info("Disconnected from databases!");
-        }
-
         Hilda.getLogger().info("Disconnecting from Discord...");
         this.bot.shutdown();
         Hilda.getLogger().info("Disconnected!");
@@ -205,7 +188,6 @@ public class Hilda {
         Hilda.getLogger().info("Registering managers...");
         this.commander = new CommandManager(this);
         this.configs = new ConfigurationManager(this);
-        this.databases = new DatabaseManager(this);
         this.plugins = new PluginManager(this);
         Hilda.getLogger().info("Managers registered!");
 

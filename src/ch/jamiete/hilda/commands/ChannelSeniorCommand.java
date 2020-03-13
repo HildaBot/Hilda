@@ -19,13 +19,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
 import org.apache.commons.lang3.StringUtils;
 import ch.jamiete.hilda.Hilda;
-import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.MessageBuilder.Formatting;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
 
 public abstract class ChannelSeniorCommand extends ChannelCommand {
     private final List<ChannelSubCommand> subcommands = new ArrayList<ChannelSubCommand>();
@@ -77,11 +76,11 @@ public abstract class ChannelSeniorCommand extends ChannelCommand {
     public void help(final TextChannel channel, final Member member) {
         final MessageBuilder mb = new MessageBuilder();
 
-        mb.append(StringUtils.capitalize(this.getName()) + " Help", Formatting.UNDERLINE);
+        mb.append(StringUtils.capitalize(this.getName()) + " Help", MessageBuilder.Formatting.UNDERLINE);
         mb.append("\n");
-        mb.append(this.getDescription(), Formatting.ITALICS);
+        mb.append(this.getDescription(), MessageBuilder.Formatting.ITALICS);
         mb.append("\n\n");
-        mb.append("Use ").append(CommandManager.PREFIX + this.getName() + " <command>", Formatting.BOLD);
+        mb.append("Use ").append(CommandManager.PREFIX + this.getName() + " <command>", MessageBuilder.Formatting.BOLD);
         mb.append(" to use this command:");
 
         for (final ChannelCommand subcommand : this.subcommands) {
@@ -90,7 +89,7 @@ public abstract class ChannelSeniorCommand extends ChannelCommand {
             }
 
             mb.append("\n  ");
-            mb.append(subcommand.getName(), Formatting.BOLD);
+            mb.append(subcommand.getName(), MessageBuilder.Formatting.BOLD);
             mb.append(" — ");
             mb.append(subcommand.getDescription());
         }

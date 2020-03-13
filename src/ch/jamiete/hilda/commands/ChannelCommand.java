@@ -17,9 +17,9 @@ package ch.jamiete.hilda.commands;
 
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Sanity;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.MessageEmbed;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 
 public abstract class ChannelCommand extends GenericCommand {
     private CommandTranscendLevel transcend = CommandTranscendLevel.NONE;

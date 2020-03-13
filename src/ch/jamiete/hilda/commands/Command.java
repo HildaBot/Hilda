@@ -16,7 +16,7 @@
 package ch.jamiete.hilda.commands;
 
 import java.util.List;
-import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.api.Permission;
 
 public interface Command {
 

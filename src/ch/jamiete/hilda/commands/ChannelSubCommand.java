@@ -16,7 +16,7 @@
 package ch.jamiete.hilda.commands;
 
 import ch.jamiete.hilda.Hilda;
-import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.api.entities.Message;
 
 public abstract class ChannelSubCommand extends ChannelCommand {
     private final ChannelSeniorCommand senior;

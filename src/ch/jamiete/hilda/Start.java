@@ -25,8 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.security.auth.login.LoginException;
 import ch.jamiete.hilda.listeners.UncaughtExceptionListener;
-import net.dv8tion.jda.core.exceptions.RateLimitedException;
-import net.dv8tion.jda.core.requests.RestAction;
+import net.dv8tion.jda.api.requests.RestAction;
 
 public class Start {
     /**
@@ -124,10 +123,12 @@ public class Start {
 
     private void start(final String apikey) {
         if (Start.DEBUG) {
-            Hilda.getLogger().fine("Debug enabled.");
+            Hilda.getLogger().fine("======================");
+            Hilda.getLogger().fine("Started in DEBUG mode.");
+            Hilda.getLogger().fine("======================");
 
             RestAction.setPassContext(true);
-            RestAction.DEFAULT_FAILURE = Throwable::printStackTrace;
+            RestAction.setDefaultFailure(Throwable::printStackTrace);
         }
 
         try {
@@ -136,8 +137,7 @@ public class Start {
         } catch (final IllegalArgumentException e) {
             Hilda.getLogger().log(Level.WARNING, "Encountered an exception while starting Hilda", e);
             System.exit(1);
-        } catch (LoginException | InterruptedException
-                | RateLimitedException e) {
+        } catch (LoginException | InterruptedException e) {
             Hilda.getLogger().log(Level.WARNING, "Encountered an exception while logging in to Discord", e);
 
             this.tries++;

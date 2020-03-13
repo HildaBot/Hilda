@@ -15,26 +15,18 @@
  *******************************************************************************/
 package ch.jamiete.hilda.events;
 
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.events.Event;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.events.GenericEvent;
 
-public class UnhandledEventExceptionEvent extends Event {
+import javax.annotation.Nonnull;
+
+public class UnhandledEventExceptionEvent implements GenericEvent {
     private final Throwable throwable;
-    private final Event event;
+    private final GenericEvent event;
 
-    public UnhandledEventExceptionEvent(final JDA api, final long responseNumber, final Throwable throwable, final Event event) {
-        super(api, responseNumber);
-
+    public UnhandledEventExceptionEvent(final JDA api, final long responseNumber, final Throwable throwable, final GenericEvent event) {
         this.throwable = throwable;
         this.event = event;
-    }
-
-    /**
-     * Get the event that was handled with an exception.
-     * @return
-     */
-    public Event getEvent() {
-        return this.event;
     }
 
     /**
@@ -43,5 +35,16 @@ public class UnhandledEventExceptionEvent extends Event {
      */
     public Throwable getThrowable() {
         return this.throwable;
+    }
+
+    @Nonnull
+    @Override
+    public JDA getJDA() {
+        return null;
+    }
+
+    @Override
+    public long getResponseNumber() {
+        return 0;
     }
 }

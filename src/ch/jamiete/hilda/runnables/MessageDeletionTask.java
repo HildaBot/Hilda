@@ -15,7 +15,7 @@
  *******************************************************************************/
 package ch.jamiete.hilda.runnables;
 
-import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.api.entities.Message;
 
 public class MessageDeletionTask implements Runnable {
     private final Message message;

@@ -26,9 +26,8 @@ import ch.jamiete.hilda.Sanity;
 import ch.jamiete.hilda.Util;
 import ch.jamiete.hilda.events.EventHandler;
 import ch.jamiete.hilda.runnables.CommandCleanupTask;
-import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.MessageBuilder.Formatting;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 
 public class CommandManager {
     /**
@@ -164,8 +163,8 @@ public class CommandManager {
                 event.getAuthor().openPrivateChannel().queue(channel -> {
                     MessageBuilder mb = new MessageBuilder();
                     mb.append("I can't run your command in ");
-                    mb.append("#" + event.getChannel().getName(), Formatting.BOLD);
-                    mb.append(" on ").append(event.getGuild().getName(), Formatting.BOLD);
+                    mb.append("#" + event.getChannel().getName(), MessageBuilder.Formatting.BOLD);
+                    mb.append(" on ").append(event.getGuild().getName(), MessageBuilder.Formatting.BOLD);
                     mb.append(" because I don't have permission to speak in that channel. Please ask an administrator or the owner (");
                     mb.append(event.getGuild().getOwner().getAsMention()).append(") to grant me the appropriate permissions.");
                     channel.sendMessage(mb.build());

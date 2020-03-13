@@ -31,21 +31,21 @@ import java.util.Set;
 import java.util.logging.Level;
 import ch.jamiete.hilda.Hilda;
 import ch.jamiete.hilda.Util;
-import net.dv8tion.jda.core.events.Event;
-import net.dv8tion.jda.core.events.channel.text.GenericTextChannelEvent;
-import net.dv8tion.jda.core.events.channel.voice.GenericVoiceChannelEvent;
-import net.dv8tion.jda.core.events.guild.GenericGuildEvent;
-import net.dv8tion.jda.core.events.message.guild.GenericGuildMessageEvent;
-import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent;
-import net.dv8tion.jda.core.events.role.GenericRoleEvent;
-import net.dv8tion.jda.core.hooks.IEventManager;
+import net.dv8tion.jda.api.events.Event;
+import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.channel.text.GenericTextChannelEvent;
+import net.dv8tion.jda.api.events.channel.voice.GenericVoiceChannelEvent;
+import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
+import net.dv8tion.jda.api.events.message.guild.GenericGuildMessageEvent;
+import net.dv8tion.jda.api.events.message.guild.react.GenericGuildMessageReactionEvent;
+import net.dv8tion.jda.api.events.role.GenericRoleEvent;
+import net.dv8tion.jda.api.hooks.IEventManager;
 
 /**
- * Implementation for {@link net.dv8tion.jda.core.hooks.IEventManager IEventManager}
+ * Implementation for {@link net.dv8tion.jda.api.hooks.IEventManager IEventManager}
  * which checks for {@link EventHandler EventHandler} annotations on both
  * <b>static</b> and <b>member</b> methods.
  *
- * <p>Listeners for this manager do <u>not</u> need to implement {@link net.dv8tion.jda.core.hooks.EventListener EventListener}
  * <br>Example
  * <pre><code>
  *     public class Foo
@@ -58,13 +58,11 @@ import net.dv8tion.jda.core.hooks.IEventManager;
  *     }
  * </code></pre>
  *
- * @see net.dv8tion.jda.core.hooks.InterfacedEventManager
- * @see net.dv8tion.jda.core.hooks.IEventManager
  * @see EventHandler
  */
 public class AnnotatedEventManager implements IEventManager {
     private final Set<Object> listeners = new HashSet<>();
-    private final Map<Class<? extends Event>, Map<Object, List<Method>>> methods = new HashMap<>();
+    private final Map<Class<? extends GenericEvent>, Map<Object, List<Method>>> methods = new HashMap<>();
 
     private Hilda hilda;
 
@@ -79,8 +77,8 @@ public class AnnotatedEventManager implements IEventManager {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void handle(final Event event) {
-        Class<? extends Event> eventClass = event.getClass();
+    public void handle(final GenericEvent event) {
+        Class<? extends GenericEvent> eventClass = event.getClass();
 
         // Check if server's events should be ignored
 
@@ -142,7 +140,7 @@ public class AnnotatedEventManager implements IEventManager {
             final Map<Object, List<Method>> listeners = this.methods.get(eventClass);
 
             if (listeners != null) {
-                final Class<? extends Event> eventClassFinal = eventClass;
+                final Class<? extends GenericEvent> eventClassFinal = eventClass;
 
                 listeners.entrySet().forEach(e -> e.getValue().forEach(method -> {
                     try {
