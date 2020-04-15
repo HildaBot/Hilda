@@ -63,7 +63,7 @@
 		<finalName>${project.artifactId}</finalName>
 		<resources>
 			<resource>
-				<directory>src/version.properties</directory>
+				<directory>src</directory>
 				<filtering>true</filtering>
 			</resource>
 		</resources>
